@@ -1,0 +1,221 @@
+import datetime
+import csv
+
+from Expense import Expense
+from RecurringCost import RecurringCost
+from Income import Income
+
+
+def inputExpense(expenseInfo):
+	'''
+	This function simply takes the expense input from the user and splits, converts and uploads it (if input is correct) to the database.
+	INPUT: expenseInfo (string)
+	Output: expense (Expense)
+	'''
+
+	try:
+		# Attempts to split the input data to later decipher and handle
+		expenseInfoList = expenseInfo.split(',')
+	except Exception as err:
+		# Error that's printed if that does not go well.
+		print("Wasn't able to properly derive values from input.")
+		print(err)
+	else:
+		if len(expenseInfoList[0]) == 8 and len(expenseInfoList) == 4:
+			try:
+				# If the date-spot in the list has the correct length, we attempt to extract the value of entered year, month and date 
+				# through list index slicing and directly put it into a variable that is of the class 'datetime'
+				expenseDate = datetime.date(int(expenseInfoList[0][0:4]), int(expenseInfoList[0][4:6]), int(expenseInfoList[0][6:8]))
+			except Exception as err:
+				print("Something went wrong when trying to convert input date format to datetime-class.")
+				print(err)
+			else:
+				print("datetime-class convertion successful.")
+				try:
+					# Attempt to put the category-data that was prompted by the user into 'expenseCategory'
+					expenseCategory = expenseInfoList[1]
+				except Exception as err:
+					print("Wasn't able to load category data into variable.")
+					print(err)
+				else:
+					try:
+						# Attempt to put the amount that was prompted by the user into 'expenseAmount'
+						expenseAmount = int(expenseInfoList[2])
+					except Exception as err:
+						print("Wasn't able to load expense amount data into variable.")
+						print(err)
+					else:
+						try:
+							# Attempt to put the comment-data that was prompted by the user into 'expenseComment'
+							expenseComment = expenseInfoList[3]
+						except Exception as err:
+							print("Wasn't able to load expense comment data into variable.")
+							print(err)
+						else:
+							print("Successfully loaded all data into variables.\n Attempting to create Expense object.")
+							# Creating an Expense object called 'expense' for convenience.
+							expense = Expense(expenseDate, expenseCategory, expenseAmount, expenseComment)
+							return expense
+
+		else:
+			print("Invalid date input. (too long/short)")
+			print("Please enter a date such as if the current date is Oct 7, 2019, enter '20191007'")
+			return None	
+
+def inputRecurringExpense():
+	pass
+
+def inputIncome(incomeInfo):
+	'''
+	This function simply takes the income input from the user and splits, converts and uploads it (if input is correct) to the database.
+	INPUT: incomeInfo (string)
+	Output: income (Income)
+	'''
+
+	try:
+		# Attempts to split the input data to later decipher and handle
+		incomeInfoList = incomeInfo.split(',')
+	except Exception as err:
+		# Error that's printed if that does not go well.
+		print("Wasn't able to properly derive values from input.")
+		print(err)
+	else:
+		if len(incomeInfoList[0]) == 8 and len(incomeInfoList) == 4:
+			try:
+				# If the date-spot in the list has the correct length, we attempt to extract the value of entered year, month and date 
+				# through list index slicing and directly put it into a variable that is of the class 'datetime'
+				incomeDate = datetime.date(int(incomeInfoList[0][0:4]), int(incomeInfoList[0][4:6]), int(incomeInfoList[0][6:8]))
+			except Exception as err:
+				print("Something went wrong when trying to convert input date format to datetime-class.")
+				print(err)
+			else:
+				try:
+					# Attempt to put the category-data that was prompted by the user into 'incomeCategory'
+					incomeCategory = incomeInfoList[1]
+				except Exception as err:
+					print("Wasn't able to load category data into variable.")
+					print(err)
+				else:
+					try:
+						# Attempt to put the amount that was prompted by the user into 'incomeAmount'
+						incomeAmount = int(incomeInfoList[2])
+					except Exception as err:
+						print("Wasn't able to load income amount data into variable.")
+						print(err)
+					else:
+						try:
+							# Attempt to put the comment-data that was prompted by the user into 'incomeComment'
+							incomeComment = incomeInfoList[3]
+						except Exception as err:
+							print("Wasn't able to load income comment data into variable.")
+							print(err)
+						else:
+							# Creating an income object called 'income' for convenience.
+							income = Income(incomeDate, incomeCategory, incomeAmount, incomeComment)
+							return income
+
+		else:
+			print("Invalid date input (too long/short).")
+			print("Please enter a date such as if the current date is Oct 7, 2019, enter '20191007'")
+			return None
+
+def fileLoader(month):
+	try:
+		with open('employee_birthday.txt', mode='r') as csv_file:
+			csv_reader = csv.DictReader(csv_file)
+			line_count = 0
+			for row in csv_reader:
+				if line_count == 0:
+					print(f'{", ".join(row)}')
+					line_count += 1
+				else:
+					print(f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.')
+					line_count += 1
+
+				
+
+	except Exception as err:
+		print("\nSomething went wrong when trying to load the file.\nPlease make sure the file exists.")
+		print(err)
+
+	else:
+		print("\n\tData retrieval successful!")
+	
+
+
+master_input = True
+menu_choice = 0
+
+while master_input:
+	try:
+		menu_choice = int(input("\nWhat would you like to do? \n(input corresponding number) \n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n"))
+	except Exception as err:
+		print("Sorry, we were not able to determine what you would like to do.")
+		print(err)
+	else:
+		if menu_choice == 1:
+			print("\nYou chose 1: Expenses\n")
+			
+			while True:
+				expenseInput = input("\nWhat would you like to do with Expenses?\n\t1: Add Expenses\n\t2: Update Expense Data\n\t3: Delete Expense Data")
+				
+				if 1 <= expenseInput <= 3:
+					while expenseInput == 1:
+
+						expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your expense data: ")
+						expense = inputExpense(expenseInfo)
+						if expense != None:
+							print(expense)
+							# SAVE THE ENTERED DATA INTO A DATABASE
+							expense.addExpense()
+										
+
+						if input("Would you like to input more expenses?\n\t'y'/'n' : ").lower() == 'y':
+							continue
+						else:
+							break
+				else:
+					break
+
+		elif menu_choice == 2:
+			print("\nYou chose 2: Input Income\n")
+			incomeInput = True
+			while incomeInput:
+				income = inputIncome(incomeInfo = input("\nPlease enter the necessary information about the income in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your income data: "))
+				print(income)
+
+				if income != None:
+					# SAVE THE ENTERED DATA INTO A DATABASE
+					income.addIncome()
+								
+
+				if input("\nWould you like to input more incomes?\n\t'y'/'n' : ").lower() == 'y':
+					incomeInput = True
+				else:
+					incomeInput = False
+
+		elif menu_choice == 3:
+			print("\nYou chose 3: Analyze Budget")
+			break
+		elif menu_choice == 4:
+			print("\nYou chose 4: Load Data")
+			
+			fileLoader(month = input("\nType the month that you want to import into the database.\n\tNote that the file has to be in the same folder as the application itself and must be CSV format.\n\tMonth: "))
+
+			if input("\nWould you like to load data from other files?\n\t'y'/'n' : ").lower() == 'y':
+				incomeInput = True
+			else:
+				incomeInput = False
+			
+		else:
+			print("\nPlease, make a valid menu choice (1-3).")
+			continue
+	
+	master_input = (input("Would you like to input more data? \n\t'y'/'n' : ").lower() == 'y')
+
+
+
+if __name__ == '__main__':
+	print("BudgetTracker.py is being run directly.")
+else:
+	print("BudgetTracker.py was imported.")
