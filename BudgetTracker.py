@@ -129,7 +129,10 @@ def fileLoader(month):
 					print(f"{'    '.join(row)}")
 
 				print(f"{row['Year']} \t{row['Month']} \t {row['Date']} \t {row['Living']} \t   {row['Food']}\t   {row['Medical']}\t      {row['Transportation']}\t\t{row['Kitties']} \t   {row['Shopping']} \t       {row['Entertainment']} \t\t{row['Sport']} \t {row['Misc.']} \t  {row['Travel']} \t    {row['Debts']} \t     {row['Savings']} \t\t{row['Income']}")
-				
+				for key, value in row:
+					if (row[key] != 0) and (key != 'Year') and (key != 'Month') and (key != 'Date'):
+						pass
+
 				line_count += 1
 
 	except Exception as err:
@@ -155,25 +158,31 @@ while master_input:
 			print("\nYou chose 1: Expenses\n")
 			
 			while True:
-				expenseInput = input("\nWhat would you like to do with Expenses?\n\t1: Add Expenses\n\t2: Update Expense Data\n\t3: Delete Expense Data")
-				
-				if 1 <= expenseInput <= 3:
-					while expenseInput == 1:
-
-						expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your expense data: ")
-						expense = inputExpense(expenseInfo)
-						if expense != None:
-							print(expense)
-							# SAVE THE ENTERED DATA INTO A DATABASE
-							expense.addExpense()
-										
-
-						if input("Would you like to input more expenses?\n\t'y'/'n' : ").lower() == 'y':
-							continue
-						else:
-							break
+				try:
+					expenseInput = int(input("\nWhat would you like to do with Expenses?\n\t1: Add Expenses\n\t2: Update Expense Data\n\t3: Delete Expense Data\n\n\tYour choice: "))
+				except Exception as err:
+					print("\nTry using a number.. works better that way. Dumbass.\n")
+					print(err)
 				else:
-					break
+
+					if 1 <= expenseInput <= 3:
+						while expenseInput == 1:
+
+							expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your expense data: ")
+							expense = inputExpense(expenseInfo)
+							if expense != None:
+								print(expense)
+								# SAVE THE ENTERED DATA INTO A DATABASE
+								expense.addExpense()
+											
+
+							if input("Would you like to input more expenses?\n\t'y'/'n' : ").lower() == 'y':
+								continue
+							else:
+								expenseInput = 0
+								break
+					else:
+						break
 
 		elif menu_choice == 2:
 			print("\nYou chose 2: Income\n")
