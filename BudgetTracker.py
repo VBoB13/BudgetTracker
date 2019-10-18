@@ -121,18 +121,16 @@ def inputIncome(incomeInfo):
 
 def fileLoader(month):
 	try:
-		with open('employee_birthday.txt', mode='r') as csv_file:
+		with open(f'{month}.csv', mode='r') as csv_file:
 			csv_reader = csv.DictReader(csv_file)
 			line_count = 0
 			for row in csv_reader:
 				if line_count == 0:
-					print(f'{", ".join(row)}')
-					line_count += 1
-				else:
-					print(f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.')
-					line_count += 1
+					print(f"{'    '.join(row)}")
 
+				print(f"{row['Year']} \t{row['Month']} \t {row['Date']} \t {row['Living']} \t   {row['Food']}\t   {row['Medical']}\t      {row['Transportation']}\t\t{row['Kitties']} \t   {row['Shopping']} \t       {row['Entertainment']} \t\t{row['Sport']} \t {row['Misc.']} \t  {row['Travel']} \t    {row['Debts']} \t     {row['Savings']} \t\t{row['Income']}")
 				
+				line_count += 1
 
 	except Exception as err:
 		print("\nSomething went wrong when trying to load the file.\nPlease make sure the file exists.")
@@ -178,7 +176,7 @@ while master_input:
 					break
 
 		elif menu_choice == 2:
-			print("\nYou chose 2: Input Income\n")
+			print("\nYou chose 2: Income\n")
 			incomeInput = True
 			while incomeInput:
 				income = inputIncome(incomeInfo = input("\nPlease enter the necessary information about the income in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your income data: "))
@@ -199,14 +197,16 @@ while master_input:
 			break
 		elif menu_choice == 4:
 			print("\nYou chose 4: Load Data")
-			
-			fileLoader(month = input("\nType the month that you want to import into the database.\n\tNote that the file has to be in the same folder as the application itself and must be CSV format.\n\tMonth: "))
 
-			if input("\nWould you like to load data from other files?\n\t'y'/'n' : ").lower() == 'y':
-				incomeInput = True
-			else:
-				incomeInput = False
-			
+			dataLoad = True
+			while dataLoad:	
+				fileLoader(month = input("\nType the month that you want to import into the database.\n\tNote that the file has to be in the same folder as the application itself and must be CSV format.\n\tMonth: "))
+
+				if input("\nWould you like to load data from other files?\n\t'y'/'n' : ").lower() == 'y':
+					dataLoad = True
+				else:
+					dataLoad = False
+				
 		else:
 			print("\nPlease, make a valid menu choice (1-3).")
 			continue
