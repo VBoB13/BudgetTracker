@@ -199,7 +199,7 @@
 			"file": "Expense.py",
 			"settings":
 			{
-				"buffer_size": 622,
+				"buffer_size": 1731,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -208,7 +208,7 @@
 			"file": "RecurringCost.py",
 			"settings":
 			{
-				"buffer_size": 982,
+				"buffer_size": 980,
 				"line_ending": "Windows"
 			}
 		},
@@ -216,7 +216,7 @@
 			"file": "Income.py",
 			"settings":
 			{
-				"buffer_size": 503,
+				"buffer_size": 1475,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -225,7 +225,7 @@
 			"file": "BudgetTracker.py",
 			"settings":
 			{
-				"buffer_size": 239,
+				"buffer_size": 8594,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -291,6 +291,7 @@
 	},
 	"file_history":
 	[
+		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/.git/COMMIT_EDITMSG",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/Recurring Costs.py",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/Income",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Text.py",
@@ -401,15 +402,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 622,
+						"buffer_size": 1731,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								64,
-								64
+								0,
+								0
 							]
 						],
 						"settings":
@@ -429,7 +430,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 982,
+						"buffer_size": 980,
 						"regions":
 						{
 						},
@@ -458,15 +459,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 503,
+						"buffer_size": 1475,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								15,
-								15
+								0,
+								0
 							]
 						],
 						"settings":
@@ -486,15 +487,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 239,
+						"buffer_size": 8594,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								113,
-								113
+								0,
+								0
 							]
 						],
 						"settings":

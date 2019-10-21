@@ -4,6 +4,7 @@ import csv
 from Expense import Expense
 from RecurringCost import RecurringCost
 from Income import Income
+from Budget import Budget
 
 
 def inputExpense(expenseInfo):
@@ -147,6 +148,7 @@ def fileLoader(month):
 master_input = True
 menu_choice = 0
 
+
 while master_input:
 	try:
 		menu_choice = int(input("\nWhat would you like to do? \n(input corresponding number) \n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n"))
@@ -159,7 +161,7 @@ while master_input:
 			
 			while True:
 				try:
-					expenseInput = int(input("\nWhat would you like to do with Expenses?\n\t1: Add Expenses\n\t2: Update Expense Data\n\t3: Delete Expense Data\n\n\tYour choice: "))
+					expenseInput = int(input("\nWhat would you like to do with Expenses?\n\t1: Add Expenses\n\t2: Update Expense Data\n\t3: Delete Expense Data\n\t4: Main Menu\n\n\tYour choice: "))
 				except Exception as err:
 					print("\nTry using a number.. works better that way. Dumbass.\n")
 					print(err)
@@ -181,6 +183,8 @@ while master_input:
 							else:
 								expenseInput = 0
 								break
+					elif expenseInput == 4:
+						break
 					else:
 						break
 
@@ -203,6 +207,8 @@ while master_input:
 
 		elif menu_choice == 3:
 			print("\nYou chose 3: Analyze Budget")
+			currentBudget = Budget()
+			currentBudget.getThisMonthIncome()
 			break
 		elif menu_choice == 4:
 			print("\nYou chose 4: Load Data")
