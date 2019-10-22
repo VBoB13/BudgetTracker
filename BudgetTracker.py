@@ -209,7 +209,19 @@ while master_input:
 			print("\nYou chose 3: Analyze Budget")
 			currentBudget = Budget()
 			currentBudget.getThisMonthIncome()
-			break
+
+			while True:
+				try:
+				 	budget_choice = int(input("\t Put in the number for the kind of alanysis you would like: \n1 : Spending Analysis\n2 : Saving Analysis\n3 : Budget Settings\n4 : Back to Main Menu"))
+				except Exception as err:
+					print("\n\t <<< Stick to the NUMBERS... Keyword: NUMBERS >>>")
+					print(err)
+				else:
+					if budget_choice == 1:
+						currentBudget.spendingAnalysis()
+					else:
+						break
+
 		elif menu_choice == 4:
 			print("\nYou chose 4: Load Data")
 
