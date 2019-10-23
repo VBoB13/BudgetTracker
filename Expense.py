@@ -1,7 +1,10 @@
 import datetime
 import psycopg2 as pg2
+from FileLoader import FileLoader
 
-secret = 'R1cJ3nn@10/19'
+pwfile = FileLoader("pass.txt")
+secret = pwfile.loadPass()
+
 category_check_list = {'Living':11, 'Food':12, 'Medical':13, 'Transportation':14, 'Kitties':15, 'Shopping':21, 'Entertainment':22, 'Sport':23, 'Travel':24, 'Misc':25, 'Debt':31, 'Savings':32, 'Income':41, 'Other Income':42}
 
 class Expense:

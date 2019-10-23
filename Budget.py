@@ -2,9 +2,13 @@ import datetime
 from calendar import monthrange
 import psycopg2 as pg2
 import pandas as pd
-import matplotlib as plt
+from matplotlib import pyplot as plt
 
-secret = 'R1cJ3nn@10/19'
+from FileLoader import FileLoader
+
+pwfile = FileLoader("pass.txt")
+secret = pwfile.loadPass()
+
 category_check_list = {'Living':11, 'Food':12, 'Medical':13, 'Transportation':14, 'Kitties':15, 'Shopping':21, 'Entertainment':22, 'Sport':23, 'Travel':24, 'Misc':25, 'Debt':31, 'Savings':32, 'Income':41, 'Other Income':42}
 
 class Budget:
@@ -20,7 +24,10 @@ class Budget:
         pass
 
     def __str__(self):
-        return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}"
+        if self.avgDailySpending == 0:
+            return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}"
+        else:
+            return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}"
 
     def getThisMonthIncome(self):
         '''
@@ -28,13 +35,15 @@ class Budget:
         This is simply to always have a budget ready to be used in calculations and (later) determine whether the user needs any spending behavior changed.
         '''
         today = datetime.date.today()
+
+        # Checks to see whether the previous month has less amount of days than the current one
+        # If it has less days, then the date is subtracted by the amount of days that the current month has MORE than the previous one
+        # This then gets converted into a string for later use in database query
         if monthrange(today.year, today.month - 1)[1] < monthrange(today.year, today.month)[1]:
             maxDaysDiff = monthrange(today.year, today.month)[1] - monthrange(today.year, today.month - 1)[1]
-            lastMonthToday = str(today.replace(month=today.month - 1, day=today.day - maxDaysDiff))
+            lastMonthToday = str(today.replace(month=(today.month - 1), day=(today.day - maxDaysDiff)))
         else:
-            lastMonthToday = str(today.replace(month=today.month - 1))
-            
-        print(lastMonthToday)
+            lastMonthToday = str(today.replace(month=(today.month - 1)))
         
         totalIncome = 0
 
@@ -49,19 +58,19 @@ class Budget:
             print("\n\t-- Was not able to add data to database --")
             print(f"\t Error: {err}\n")
         else:
-            incomeSQL = cur.fetchall()
+            incomeSQL = cur.fetchone()
             for row in incomeSQL:
                 totalIncome = row[0]
             
-            print(totalIncome)
             self.thisMonthIncome = totalIncome
-            self.avgDailyIncome = totalIncome/(monthrange(today.year,today.month))
+            self.avgDailyIncome = format(totalIncome/(monthrange(today.year,today.month)[1]), '.1f')
+            print(self)
         finally:
             conn.close()
 
     def getAvgDailySpending(self):
-        currentYearLastMonth = datetime.date.today()
-        lastMonthToday = str(currentYearLastMonth.replace(month=currentYearLastMonth.month-1))
+        today = datetime.date.today()
+        lastMonthToday = str(today.replace(month=today.month-1))
 
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
@@ -74,14 +83,20 @@ class Budget:
             print(f"\n\t{err}")
         else:
             result = cur.fetchone()
-            print(result)
+            print(result[1])
         finally:
             conn.close()
 
         self.avgDailySpending = result
     
+    def getCategorizedSpendingThisMonth(self):
+        today = datetime.date.today()
+
+
     def spendingAnalysis(self):
         self.getAvgDailySpending()
+        self.getCategorizedSpendingThisMonth()
+
 
 
 
