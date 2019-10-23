@@ -18,7 +18,10 @@ class Budget:
     savingsRatio = 0.2
     thisMonthIncome = 0
     avgDailyIncome = 0
+    totalSpending = 0
     avgDailySpending = 0
+    lastMonthToday = ""
+    categorizedSpendingThisMonth = {}
 
     def __init__(self):
         pass
@@ -28,12 +31,8 @@ class Budget:
             return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}"
         else:
             return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}"
-
-    def getThisMonthIncome(self):
-        '''
-        Function used to initialize the budget ratios every time the application starts.
-        This is simply to always have a budget ready to be used in calculations and (later) determine whether the user needs any spending behavior changed.
-        '''
+    
+    def getLastMonthToday(self):
         today = datetime.date.today()
 
         # Checks to see whether the previous month has less amount of days than the current one
@@ -41,10 +40,18 @@ class Budget:
         # This then gets converted into a string for later use in database query
         if monthrange(today.year, today.month - 1)[1] < monthrange(today.year, today.month)[1]:
             maxDaysDiff = monthrange(today.year, today.month)[1] - monthrange(today.year, today.month - 1)[1]
-            lastMonthToday = str(today.replace(month=(today.month - 1), day=(today.day - maxDaysDiff)))
+            self.lastMonthToday = str(today.replace(month=(today.month - 1), day=(today.day - maxDaysDiff)))
         else:
-            lastMonthToday = str(today.replace(month=(today.month - 1)))
-        
+            self.lastMonthToday = str(today.replace(month=(today.month - 1)))
+
+        return self.lastMonthToday
+
+    def getThisMonthIncome(self):
+        '''
+        Function used to initialize the budget ratios every time the application starts.
+        This is simply to always have a budget ready to be used in calculations and (later) determine whether the user needs any spending behavior changed.
+        '''
+        today = datetime.date.today()
         totalIncome = 0
 
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
@@ -53,7 +60,7 @@ class Budget:
         query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND (category LIKE 'Income')"
 
         try:
-            cur.execute(query % lastMonthToday)
+            cur.execute(query % self.lastMonthToday)
         except Exception as err:
             print("\n\t-- Was not able to add data to database --")
             print(f"\t Error: {err}\n")
@@ -68,16 +75,33 @@ class Budget:
         finally:
             conn.close()
 
-    def getAvgDailySpending(self):
-        today = datetime.date.today()
-        lastMonthToday = str(today.replace(month=today.month-1))
+    def getTotalSpending(self):
+        
+        conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+        cur = conn.cursor()
+        query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND (category_id != 41) AND (category_id != 42)"
 
+        try:
+            cur.execute(query % self.lastMonthToday)
+        except Exception as err:
+            print("\nSomething clearly went wrong here...")
+            print(f"\n\t{err}")
+        else:
+            result = cur.fetchone()
+            print(result[1])
+        finally:
+            conn.close()
+
+        self.totalSpending = result
+
+    def getAvgDailySpending(self):
+        
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
         query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND (category_id != 41) AND (category_id != 42)"
 
         try:
-            cur.execute(query % lastMonthToday)
+            cur.execute(query % self.lastMonthToday)
         except Exception as err:
             print("\nSomething clearly went wrong here...")
             print(f"\n\t{err}")
@@ -91,9 +115,36 @@ class Budget:
     
     def getCategorizedSpendingThisMonth(self):
         today = datetime.date.today()
+        query = '''SELECT SUM(amount) 
+                    FROM year_record 
+                    WHERE datetime > '%s' 
+                    AND category_id = %s'''
+        
+        for key, value in category_check_list:
+
+            conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+            cur = conn.cursor()
+
+            try:
+                cur.execute(query % (self.lastMonthToday, value))
+            except Exception as err:
+                print("\nSomething clearly went wrong here...")
+                print(f"\n\t{err}")
+            else:
+                result = cur.fetchone()
+                print(result[1])
+            finally:
+                conn.close()
+
+            totalCategorySpending = result[1]
+
+            self.categorizedSpendingThisMonth[key] = {'Total':totalCategorySpending, 'Daily Avg':format((totalCategorySpending/(monthrange(today.year,today.month)[1])), '.1f'), 'Spending Ratio':format((totalCategorySpending/self.totalSpending), '.1f')}
+
 
 
     def spendingAnalysis(self):
+        self.getLastMonthToday()
+        self.getTotalSpending()
         self.getAvgDailySpending()
         self.getCategorizedSpendingThisMonth()
 
