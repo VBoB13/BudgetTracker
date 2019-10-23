@@ -28,9 +28,9 @@ class Budget:
 
     def __str__(self):
         if self.avgDailySpending == 0:
-            return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}"
+            return f"\n\n-- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n"
         else:
-            return f"Current Budget Settings: \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}"
+            return f"\n\n-- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}\n"
     
     def getLastMonthToday(self):
         today = datetime.date.today()
@@ -132,7 +132,6 @@ class Budget:
                 print(f"\n\t{err}")
             else:
                 result = cur.fetchone()
-                print(result[1])
             finally:
                 conn.close()
 
@@ -141,18 +140,11 @@ class Budget:
             self.categorizedSpendingThisMonth[key] = {'Total':totalCategorySpending, 'Daily Avg':format((totalCategorySpending/(monthrange(today.year,today.month)[1])), '.1f'), 'Spending Ratio':format((totalCategorySpending/self.totalSpending), '.1f')}
 
 
-
     def spendingAnalysis(self):
         self.getLastMonthToday()
         self.getTotalSpending()
         self.getAvgDailySpending()
         self.getCategorizedSpendingThisMonth()
-
-
-
-
-    
-
 
 
 if __name__ == '__main__':

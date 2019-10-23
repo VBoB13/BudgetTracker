@@ -9,8 +9,6 @@ class FileSaver:
     def __init__(self):
         pass
 
-
-
 if __name__ == '__main__':
 	print("FileSaver.py is being run directly.")
 else:
