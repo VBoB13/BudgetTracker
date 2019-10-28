@@ -22,6 +22,7 @@ class Budget:
     avgDailySpending = 0
     lastMonthToday = ""
     categorizedSpendingThisMonth = {}
+    sqldata = pd.DataFrame
 
     def __init__(self):
         pass
@@ -44,7 +45,7 @@ class Budget:
         else:
             self.lastMonthToday = str(today.replace(month=(today.month - 1)))
 
-        return self.lastMonthToday
+        print(self.lastMonthToday)
 
     def getThisMonthIncome(self):
         '''
@@ -58,6 +59,7 @@ class Budget:
         cur = conn.cursor()
 
         query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND (category LIKE 'Income')"
+        print(self.lastMonthToday)
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -67,7 +69,7 @@ class Budget:
         else:
             incomeSQL = cur.fetchone()
             for row in incomeSQL:
-                totalIncome = row[0]
+                totalIncome = row
             
             self.thisMonthIncome = totalIncome
             self.avgDailyIncome = format(totalIncome/(monthrange(today.year,today.month)[1]), '.1f')
@@ -88,11 +90,11 @@ class Budget:
             print(f"\n\t{err}")
         else:
             result = cur.fetchone()
-            print(result[1])
+            print(f"Total Spending since {self.lastMonthToday}: {result[0]}")
         finally:
             conn.close()
 
-        self.totalSpending = result
+        self.totalSpending = result[0]
 
     def getAvgDailySpending(self):
         
@@ -107,11 +109,11 @@ class Budget:
             print(f"\n\t{err}")
         else:
             result = cur.fetchone()
-            print(result[1])
+            print(f"Avg. Daily Spending since {self.lastMonthToday}: {result[0]}")
         finally:
             conn.close()
 
-        self.avgDailySpending = result
+        self.avgDailySpending = result[0]
     
     def getCategorizedSpendingThisMonth(self):
         today = datetime.date.today()
@@ -119,32 +121,89 @@ class Budget:
                     FROM year_record 
                     WHERE datetime > '%s' 
                     AND category_id = %s'''
+
+        print("\n")
         
-        for key, value in category_check_list:
+        for key, value in category_check_list.items():
 
-            conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
-            cur = conn.cursor()
+            if value != 41 or value != 42:
 
-            try:
-                cur.execute(query % (self.lastMonthToday, value))
-            except Exception as err:
-                print("\nSomething clearly went wrong here...")
-                print(f"\n\t{err}")
-            else:
-                result = cur.fetchone()
-            finally:
-                conn.close()
+                conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+                cur = conn.cursor()
 
-            totalCategorySpending = result[1]
+                try:
+                    cur.execute(query % (self.lastMonthToday, value))
+                except Exception as err:
+                    print("\nSomething clearly went wrong here...")
+                    print(f"\n\t{err}")
+                else:
+                    result = cur.fetchone()
+                finally:
+                    conn.close()
 
-            self.categorizedSpendingThisMonth[key] = {'Total':totalCategorySpending, 'Daily Avg':format((totalCategorySpending/(monthrange(today.year,today.month)[1])), '.1f'), 'Spending Ratio':format((totalCategorySpending/self.totalSpending), '.1f')}
+                if result[0] == None:
+                    totalCategorySpending = 0
+                else:
+                    totalCategorySpending = result[0]
+
+                print(f"{key}: {totalCategorySpending}")
+
+                self.categorizedSpendingThisMonth[key] = {'Total':totalCategorySpending, 'Daily Avg':format((totalCategorySpending/(monthrange(today.year,today.month)[1])), '.1f'), 'Spending Ratio':format((totalCategorySpending/self.totalSpending), '.1f')}
+
+
+    def getPandasDataFrame(self):
+        conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+        try:
+            sql = f'''SELECT datetime, amount, category_id FROM year_record 
+                WHERE datetime > '{self.lastMonthToday}'
+                AND datetime >= '2019-10-18'
+                AND datetime < '{str(datetime.date.today())}'
+                AND category_id != 41
+                AND category_id != 42
+                ORDER BY datetime, category_id, amount;'''
+
+        except Exception as err:
+            print("Couldn't execute SQL query to import data as Pandas DataFrame")
+            print(err)
+
+        else:
+            self.sqldata = pd.read_sql_query(sql, conn)
+
+        finally:
+            conn.close()
+
+    def getTimeFrameMeans(self):
+        uniqueDateList = self.sqldata.datetime.unique()
+        
+        matchingAmountList = []
+
+        print(f"-- {self.sqldata.datetime.iloc[0]}\n\t -> {type(self.sqldata.datetime.iloc[0])}")
+        print(self.sqldata.datetime.iloc[5] - self.sqldata.datetime.iloc[0])
+        print(self.sqldata.datetime.iloc[0].day)
+
+        dailySums = []
+        '''print(self.sqldata.datetime.iloc)
+        for dateIndex in self.sqldata.datetime.iloc:
+            self.sqldata.datetime.iloc[dateIndex]'''
+        
+
+
+        print(self.sqldata)
+        print(f"{uniqueDateList}\n\n{matchingAmountList}")
+        return (uniqueDateList, matchingAmountList)
+
+    def analyzePandasDataFrame(self):
+        (time, amount) = self.getTimeFrameMeans()
+
 
 
     def spendingAnalysis(self):
         self.getLastMonthToday()
         self.getTotalSpending()
         self.getAvgDailySpending()
-        self.getCategorizedSpendingThisMonth()
+        #self.getCategorizedSpendingThisMonth()
+        self.getPandasDataFrame()
+        self.analyzePandasDataFrame()
 
 
 if __name__ == '__main__':

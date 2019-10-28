@@ -208,6 +208,7 @@ while master_input:
 		elif menu_choice == 3:
 			print("\nYou chose 3: Analyze Budget")
 			currentBudget = Budget()
+			currentBudget.getLastMonthToday()
 			currentBudget.getThisMonthIncome()
 
 			while True:
