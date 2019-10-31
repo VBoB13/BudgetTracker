@@ -199,7 +199,7 @@
 			"file": "Expense.py",
 			"settings":
 			{
-				"buffer_size": 1731,
+				"buffer_size": 1800,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -225,7 +225,7 @@
 			"file": "BudgetTracker.py",
 			"settings":
 			{
-				"buffer_size": 8594,
+				"buffer_size": 9079,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -291,6 +291,7 @@
 	},
 	"file_history":
 	[
+		"/D/Git/etc/profile",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/.git/COMMIT_EDITMSG",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/Recurring Costs.py",
 		"/E/Udemy/Python Zero to Hero Course/Projects/Final Capstone Project/Budget Tracker/Income",
@@ -402,7 +403,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1731,
+						"buffer_size": 1800,
 						"regions":
 						{
 						},
@@ -487,7 +488,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8594,
+						"buffer_size": 9079,
 						"regions":
 						{
 						},

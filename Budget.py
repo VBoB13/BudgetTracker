@@ -3,6 +3,8 @@ from calendar import monthrange
 import psycopg2 as pg2
 import pandas as pd
 from matplotlib import pyplot as plt
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 from FileLoader import FileLoader
 
@@ -173,27 +175,67 @@ class Budget:
             conn.close()
 
     def getTimeFrameMeans(self):
-        uniqueDateList = self.sqldata.datetime.unique()
         
-        matchingAmountList = []
-
+        print(self.sqldata)
         print(f"-- {self.sqldata.datetime.iloc[0]}\n\t -> {type(self.sqldata.datetime.iloc[0])}")
         print(self.sqldata.datetime.iloc[5] - self.sqldata.datetime.iloc[0])
+        date_difference = self.sqldata.datetime.iloc[5] - self.sqldata.datetime.iloc[0]
+        print(date_difference.days)
         print(self.sqldata.datetime.iloc[0].day)
+        print(self.sqldata.datetime.iloc[0].month)
+        print(self.sqldata.datetime.iloc[0].days_in_month)
 
-        dailySums = []
-        '''print(self.sqldata.datetime.iloc)
-        for dateIndex in self.sqldata.datetime.iloc:
-            self.sqldata.datetime.iloc[dateIndex]'''
+
+        dailySpendingMeans = []
+        dailyCategoryMeans = []
+        dailyCategoryMeansDict = {}
+        dateDiff = (pd.datetime.today() - self.sqldata.datetime.iloc[0]).days
+        dateList = pd.date_range(pd.to_datetime(self.sqldata.datetime.iloc[0]), periods=dateDiff).tolist()
         
+        for date in dateList:
+            if (date.day < date.days_in_month) and (date.day > 1):
+                dayPrior = date.replace(date.year, date.month, date.day-1)
+                dayAfter = date.replace(date.year, date.month, date.day+1)
+                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
+                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
+                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+
+                for key, value in category_check_list.items():
+                    categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
+                    dailyCategoryMeans.append(categoricalDataFrame.sum() / 3)
 
 
-        print(self.sqldata)
-        print(f"{uniqueDateList}\n\n{matchingAmountList}")
-        return (uniqueDateList, matchingAmountList)
+            elif date.day == 1:
+                dayPrior = date.replace(date.year, (date.month)-1, date.replace(date.year, (date.month)-1).days_in_month)
+                dayAfter = date.replace(date.year, date.month, date.day+1)
+                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
+                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
+                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+
+            else:
+                dayPrior = date.replace(date.year, date.month, date.day-1)
+                dayAfter = date.replace(date.year, (date.month)+1, 1)
+                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
+                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
+                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+
+            print(filteredDataFrame)
+            print(f"-- Day Before:\t{dayPriorString}\n-- Day After:\t{dayAfterString}")
+
+        print(dailySpendingMeans)
+        print(dateList)
+        return dateList, dailySpendingMeans, dailyCategoryMeans
 
     def analyzePandasDataFrame(self):
-        (time, amount) = self.getTimeFrameMeans()
+        time, dailySpendingMeans, dailyCategoryMeans = self.getTimeFrameMeans()
+        plt.plot(time, dailySpendingMeans)
+        plt.legend(['Total Spending'])
+        plt.xlabel('Time')
+        plt.ylabel('Amount (NTD)')
+        plt.show()
 
 
 
