@@ -159,7 +159,7 @@ class Budget:
             sql = f'''SELECT datetime, amount, category_id FROM year_record 
                 WHERE datetime > '{self.lastMonthToday}'
                 AND datetime >= '2019-10-18'
-                AND datetime < '{str(datetime.date.today())}'
+                AND datetime <= '{str(datetime.date.today())}'
                 AND category_id != 41
                 AND category_id != 42
                 ORDER BY datetime, category_id, amount;'''
@@ -187,8 +187,7 @@ class Budget:
 
 
         dailySpendingMeans = []
-        dailyCategoryMeans = []
-        dailyCategoryMeansDict = {}
+        dailyCategoryMeansDict = {'Living':[], 'Food':[], 'Medical':[], 'Transportation':[], 'Kitties':[], 'Shopping':[], 'Entertainment':[], 'Sport':[], 'Travel':[], 'Misc':[]}
         dateDiff = (pd.datetime.today() - self.sqldata.datetime.iloc[0]).days
         dateList = pd.date_range(pd.to_datetime(self.sqldata.datetime.iloc[0]), periods=dateDiff).tolist()
         
@@ -202,8 +201,9 @@ class Budget:
                 dailySpendingMeans.append(filteredDataFrame.sum() / 3)
 
                 for key, value in category_check_list.items():
-                    categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
-                    dailyCategoryMeans.append(categoricalDataFrame.sum() / 3)
+                    if value < 30:
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
+                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
 
 
             elif date.day == 1:
@@ -214,6 +214,11 @@ class Budget:
                 filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
                 dailySpendingMeans.append(filteredDataFrame.sum() / 3)
 
+                for key, value in category_check_list.items():
+                    if value < 30:
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
+                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
+
             else:
                 dayPrior = date.replace(date.year, date.month, date.day-1)
                 dayAfter = date.replace(date.year, (date.month)+1, 1)
@@ -222,12 +227,18 @@ class Budget:
                 filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
                 dailySpendingMeans.append(filteredDataFrame.sum() / 3)
 
-            print(filteredDataFrame)
-            print(f"-- Day Before:\t{dayPriorString}\n-- Day After:\t{dayAfterString}")
+                for key, value in category_check_list.items():
+                    if value < 30:
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
+                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
 
-        print(dailySpendingMeans)
-        print(dateList)
-        return dateList, dailySpendingMeans, dailyCategoryMeans
+        for key, value in dailyCategoryMeansDict.items():
+                print(f"\n{key}:\n{value}\n")
+
+        dailyCategoryMeansDF = pd.DataFrame(dailyCategoryMeansDict, index=dateList)
+        print(dailyCategoryMeansDF)
+
+        return dateList, dailySpendingMeans, dailyCategoryMeansDF
 
     def analyzePandasDataFrame(self):
         time, dailySpendingMeans, dailyCategoryMeans = self.getTimeFrameMeans()
