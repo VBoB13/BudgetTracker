@@ -22,7 +22,7 @@ def inputExpense(expenseInfo):
 		print("Wasn't able to properly derive values from input.")
 		print(err)
 	else:
-		if len(expenseInfoList[0]) == 8 and len(expenseInfoList) == 4:
+		if len(expenseInfoList[0]) == 8 and len(expenseInfoList) <= 5:
 			try:
 				# If the date-spot in the list has the correct length, we attempt to extract the value of entered year, month and date 
 				# through list index slicing and directly put it into a variable that is of the class 'datetime'
@@ -55,11 +55,21 @@ def inputExpense(expenseInfo):
 						else:
 							print("Successfully loaded all data into variables.\n Attempting to create Expense object.")
 							# Creating an Expense object called 'expense' for convenience.
-							expense = Expense(expenseDate, expenseCategory, expenseAmount, expenseComment)
-							return expense
+							if len(expenseInfoList) == 4:
+								expense = Expense(expenseDate, expenseCategory, expenseAmount, expenseComment)
+								return expense
+							else:
+								try:
+									expense_inv_period = int(expenseInfoList[4])
+								except Exception as err:
+									print("Couldn't convert investment_period data into Python variable.")
+									print(err)
+								else:
+									expense = Expense(expenseDate, expenseCategory, expenseAmount, expenseComment, expense_inv_period)
+									return expense
 
 		else:
-			print("Invalid date input. (too long/short)")
+			print("Invalid input. (ExpenseInfoList too long/short)")
 			print("Please enter a date such as if the current date is Oct 7, 2019, enter '20191007'")
 			return None	
 
@@ -170,7 +180,7 @@ while master_input:
 					if 1 <= expenseInput <= 3:
 						while expenseInput == 1:
 
-							expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment\n\tAs in: 20191007,Food,500,Dinner\n\n\t Enter your expense data: ")
+							expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment(, investment period)\n\tAs in: 20191007,Food,500,Dinner\n\t-- OR --\n\tAs in: 20191007,Food,500,Dinner,12 (for 12 months investment period)\n\tIf there's no input for Investment Period, the value will automatically be set to 1.\n\n\t Enter your expense data: ")
 							expense = inputExpense(expenseInfo)
 							if expense != None:
 								print(expense)

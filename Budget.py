@@ -116,41 +116,6 @@ class Budget:
             conn.close()
 
         self.avgDailySpending = result[0]
-    
-    def getCategorizedSpendingThisMonth(self):
-        today = datetime.date.today()
-        query = '''SELECT SUM(amount) 
-                    FROM year_record 
-                    WHERE datetime > '%s' 
-                    AND category_id = %s'''
-
-        print("\n")
-        
-        for key, value in category_check_list.items():
-
-            if value != 41 or value != 42:
-
-                conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
-                cur = conn.cursor()
-
-                try:
-                    cur.execute(query % (self.lastMonthToday, value))
-                except Exception as err:
-                    print("\nSomething clearly went wrong here...")
-                    print(f"\n\t{err}")
-                else:
-                    result = cur.fetchone()
-                finally:
-                    conn.close()
-
-                if result[0] == None:
-                    totalCategorySpending = 0
-                else:
-                    totalCategorySpending = result[0]
-
-                print(f"{key}: {totalCategorySpending}")
-
-                self.categorizedSpendingThisMonth[key] = {'Total':totalCategorySpending, 'Daily Avg':format((totalCategorySpending/(monthrange(today.year,today.month)[1])), '.1f'), 'Spending Ratio':format((totalCategorySpending/self.totalSpending), '.1f')}
 
 
     def getPandasDataFrame(self):
@@ -160,8 +125,7 @@ class Budget:
                 WHERE datetime > '{self.lastMonthToday}'
                 AND datetime >= '2019-10-18'
                 AND datetime <= '{str(datetime.date.today())}'
-                AND category_id != 41
-                AND category_id != 42
+                AND category_id < 40
                 ORDER BY datetime, category_id, amount;'''
 
         except Exception as err:
@@ -229,23 +193,44 @@ class Budget:
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
-                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata.investment_period <= 1)]
+                        dailyCategoryMeansDict[key].append(int(round((categoricalDataFrame.sum() / 3), 0)))
 
         for key, value in dailyCategoryMeansDict.items():
                 print(f"\n{key}:\n{value}\n")
 
         dailyCategoryMeansDF = pd.DataFrame(dailyCategoryMeansDict, index=dateList)
-        print(dailyCategoryMeansDF)
+        print(f"\n----------------------------\n\n{dailyCategoryMeansDF}\n\n----------------------------\n")
 
-        return dateList, dailySpendingMeans, dailyCategoryMeansDF
+        incomeList = []
+        for i in range(len(dateList)):
+            incomeList.append(self.avgDailyIncome)
+
+        dailyCategoryMeansDF.insert(0, 'Avg. Daily Spending', dailySpendingMeans, True)
+        dailyCategoryMeansDF.insert(0, 'Avg. Daily Income', incomeList, True)
+
+        print(f"\n----------------------------\n\n{dailyCategoryMeansDF}\n\n----------------------------\n")
+        
+        return dailyCategoryMeansDF
 
     def analyzePandasDataFrame(self):
-        time, dailySpendingMeans, dailyCategoryMeans = self.getTimeFrameMeans()
-        plt.plot(time, dailySpendingMeans)
-        plt.legend(['Total Spending'])
+        dailyCategoryMeansDF = self.getTimeFrameMeans()
+
+        
+        for column in dailyCategoryMeansDF.columns:
+            plt.plot(dailyCategoryMeansDF.index, dailyCategoryMeansDF[column])
+
+        plt.legend(dailyCategoryMeansDF.columns)
         plt.xlabel('Time')
         plt.ylabel('Amount (NTD)')
+
+        if int(dailyCategoryMeansDF['Avg. Daily Spending'].max()) > int(float(self.avgDailyIncome)):
+            ymax = int(dailyCategoryMeansDF['Avg. Daily Spending'].max())
+        else:
+            ymax = int(self.avgDailyIncome)
+
+        axes = plt.gca()
+        axes.set_ylim([0,ymax])
         plt.show()
 
 
@@ -254,7 +239,6 @@ class Budget:
         self.getLastMonthToday()
         self.getTotalSpending()
         self.getAvgDailySpending()
-        #self.getCategorizedSpendingThisMonth()
         self.getPandasDataFrame()
         self.analyzePandasDataFrame()
 
