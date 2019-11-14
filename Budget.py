@@ -60,8 +60,7 @@ class Budget:
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
 
-        query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND (category LIKE 'Income')"
-        print(self.lastMonthToday)
+        query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND category_id > 40"
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -83,7 +82,7 @@ class Budget:
         
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
-        query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND (category_id != 41) AND (category_id != 42)"
+        query = "SELECT ROUND(SUM(amount),1) FROM year_record WHERE datetime > '%s' AND category_id <= 31"
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -102,7 +101,7 @@ class Budget:
         
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
-        query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND (category_id != 41) AND (category_id != 42)"
+        query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND category_id < 40"
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -121,11 +120,13 @@ class Budget:
     def getPandasDataFrame(self):
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         try:
-            sql = f'''SELECT datetime, amount, category_id FROM year_record 
+            sql = f'''SELECT datetime, amount, category_id, investment_period 
+                FROM year_record 
                 WHERE datetime > '{self.lastMonthToday}'
                 AND datetime >= '2019-10-18'
                 AND datetime <= '{str(datetime.date.today())}'
                 AND category_id < 40
+                AND comment_text <> 'Rent'
                 ORDER BY datetime, category_id, amount;'''
 
         except Exception as err:
@@ -161,13 +162,13 @@ class Budget:
                 dayAfter = date.replace(date.year, date.month, date.day+1)
                 dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
                 dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
-                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata['investment_period'] == 1)]
+                dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
-                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 1))
 
 
             elif date.day == 1:
@@ -175,26 +176,26 @@ class Budget:
                 dayAfter = date.replace(date.year, date.month, date.day+1)
                 dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
                 dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
-                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata['investment_period'] == 1)]
+                dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value)]
-                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 3))
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 1))
 
             else:
                 dayPrior = date.replace(date.year, date.month, date.day-1)
                 dayAfter = date.replace(date.year, (date.month)+1, 1)
                 dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
                 dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString)]
-                dailySpendingMeans.append(filteredDataFrame.sum() / 3)
+                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.investment_period <= 1) & (self.sqldata['investment_period'] == 1)]
+                dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata.investment_period <= 1)]
-                        dailyCategoryMeansDict[key].append(int(round((categoricalDataFrame.sum() / 3), 0)))
+                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        dailyCategoryMeansDict[key].append(int(round((categoricalDataFrame.sum() / 3), 1)))
 
         for key, value in dailyCategoryMeansDict.items():
                 print(f"\n{key}:\n{value}\n")
@@ -206,8 +207,8 @@ class Budget:
         for i in range(len(dateList)):
             incomeList.append(self.avgDailyIncome)
 
-        dailyCategoryMeansDF.insert(0, 'Avg. Daily Spending', dailySpendingMeans, True)
-        dailyCategoryMeansDF.insert(0, 'Avg. Daily Income', incomeList, True)
+        dailyCategoryMeansDF.insert(len(dailyCategoryMeansDF.columns), 'Avg. Daily Spending', dailySpendingMeans, True)
+        dailyCategoryMeansDF.insert(len(dailyCategoryMeansDF.columns), 'Avg. Daily Income', incomeList, True)
 
         print(f"\n----------------------------\n\n{dailyCategoryMeansDF}\n\n----------------------------\n")
         
@@ -215,10 +216,8 @@ class Budget:
 
     def analyzePandasDataFrame(self):
         dailyCategoryMeansDF = self.getTimeFrameMeans()
-
+        dailyCategoryMeansDF.plot()
         
-        for column in dailyCategoryMeansDF.columns:
-            plt.plot(dailyCategoryMeansDF.index, dailyCategoryMeansDF[column])
 
         plt.legend(dailyCategoryMeansDF.columns)
         plt.xlabel('Time')
@@ -230,7 +229,7 @@ class Budget:
             ymax = int(self.avgDailyIncome)
 
         axes = plt.gca()
-        axes.set_ylim([0,ymax])
+        axes.set_ylim(0,ymax)
         plt.show()
 
 

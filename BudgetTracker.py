@@ -208,7 +208,6 @@ while master_input:
 				if income != None:
 					# SAVE THE ENTERED DATA INTO A DATABASE
 					income.addIncome()
-								
 
 				if input("\nWould you like to input more incomes?\n\t'y'/'n' : ").lower() == 'y':
 					incomeInput = True
