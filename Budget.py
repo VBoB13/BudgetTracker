@@ -232,14 +232,58 @@ class Budget:
         axes.set_ylim(0,ymax)
         plt.show()
 
-
-
     def spendingAnalysis(self):
         self.getLastMonthToday()
         self.getTotalSpending()
         self.getAvgDailySpending()
         self.getPandasDataFrame()
         self.analyzePandasDataFrame()
+
+    def getBudgetPandasDataFrame(self):
+        
+        groupExpenses = []
+
+        for categoryNum in range(0,4,1):
+            
+            conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+            cur = conn.cursor()
+
+            if categoryNum == 0:
+                query = f'''SELECT SUM(amount) FROM year_record
+                        WHERE datetime > '2019-10-18'
+                        AND datetime > '{self.lastMonthToday}'
+                        AND category_id < {(categoryNum+2)*10};
+                        '''
+            else:
+                query = f'''SELECT SUM(amount) FROM year_record
+                        WHERE datetime > '2019-10-18'
+                        AND datetime > '{self.lastMonthToday}'
+                        AND category_id > {(categoryNum+1)*10}
+                        AND category_id < {(categoryNum+2)*10};
+                        '''
+            try:
+                cur.execute(query)
+            except Exception as err:
+                print("\nSomething clearly went wrong here...")
+                print(f"\n\t{err}")
+            else:
+                
+                result = cur.fetchone()
+
+                if categoryNum == 0:
+                    print(f"'Living' this month: {result[0]}")
+                else:
+                    print(f"'Expenses' this month: {result[0]}")
+
+                groupExpenses[categoryNum] = result[0]
+
+            finally:
+                conn.close()
+
+
+    def budgetAnalysis(self):
+        self.getBudgetPandasDataFrame()
+        self.analyzeBudget()
 
 
 if __name__ == '__main__':
