@@ -15,8 +15,8 @@ category_check_list = {'Living':11, 'Food':12, 'Medical':13, 'Transportation':14
 
 class Budget:
 
-    livingRatio = 0.3
-    expensesRatio = 0.5
+    livingRatio = 0.35
+    expensesRatio = 0.45
     savingsRatio = 0.2
     thisMonthIncome = 0
     avgDailyIncome = 0
@@ -24,16 +24,21 @@ class Budget:
     avgDailySpending = 0
     lastMonthToday = ""
     categorizedSpendingThisMonth = {}
-    sqldata = pd.DataFrame
+    sqlSpendingData = pd.DataFrame
+    sqlBudgetData = pd.DataFrame
+
 
     def __init__(self):
-        pass
+        self.getLastMonthToday()
+        self.getThisMonthIncome()
+        self.getTotalSpending()
+        self.getAvgDailySpending()
 
     def __str__(self):
         if self.avgDailySpending == 0:
-            return f"\n\n-- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n"
+            return f"\n\n ------------------------------ \n\n -- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\n ------------------------------ \n\n"
         else:
-            return f"\n\n-- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}\n"
+            return f"\n\n ------------------------------ \n\n -- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}\n\n ------------------------------ \n\n"
     
     def getLastMonthToday(self):
         today = datetime.date.today()
@@ -60,7 +65,11 @@ class Budget:
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
 
-        query = "SELECT SUM(amount) FROM year_record WHERE datetime > '%s' AND category_id > 40"
+        query = '''
+                SELECT SUM(amount) FROM year_record 
+                WHERE datetime > '%s' 
+                AND category_id > 40
+                '''
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -82,7 +91,11 @@ class Budget:
         
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
-        query = "SELECT ROUND(SUM(amount),1) FROM year_record WHERE datetime > '%s' AND category_id <= 31"
+        query = '''
+                SELECT SUM(amount) FROM year_record 
+                WHERE datetime > '%s' 
+                AND category_id <= 31
+                '''
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -91,7 +104,7 @@ class Budget:
             print(f"\n\t{err}")
         else:
             result = cur.fetchone()
-            print(f"Total Spending since {self.lastMonthToday}: {result[0]}")
+            print(f"Total Spending since {self.lastMonthToday}:\n\t${result[0]} NT\n\n")
         finally:
             conn.close()
 
@@ -101,7 +114,7 @@ class Budget:
         
         conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
         cur = conn.cursor()
-        query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND category_id < 40"
+        query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND category_id < 30"
 
         try:
             cur.execute(query % self.lastMonthToday)
@@ -110,7 +123,7 @@ class Budget:
             print(f"\n\t{err}")
         else:
             result = cur.fetchone()
-            print(f"Avg. Daily Spending since {self.lastMonthToday}: {result[0]}")
+            print(f"Avg. Daily Spending since {self.lastMonthToday}: {result[0]} \n\t(Excluding 'Debts & Savings') \n\n")
         finally:
             conn.close()
 
@@ -134,67 +147,60 @@ class Budget:
             print(err)
 
         else:
-            self.sqldata = pd.read_sql_query(sql, conn)
+            self.sqlSpendingData = pd.read_sql_query(sql, conn)
 
         finally:
             conn.close()
 
     def getTimeFrameMeans(self):
         
-        print(self.sqldata)
-        print(f"-- {self.sqldata.datetime.iloc[0]}\n\t -> {type(self.sqldata.datetime.iloc[0])}")
-        print(self.sqldata.datetime.iloc[5] - self.sqldata.datetime.iloc[0])
-        date_difference = self.sqldata.datetime.iloc[5] - self.sqldata.datetime.iloc[0]
-        print(date_difference.days)
-        print(self.sqldata.datetime.iloc[0].day)
-        print(self.sqldata.datetime.iloc[0].month)
-        print(self.sqldata.datetime.iloc[0].days_in_month)
+        print(self.sqlSpendingData)
+        print(f"-- {self.sqlSpendingData.datetime.iloc[0]}\n\t -> {type(self.sqlSpendingData.datetime.iloc[0])}")
+        print(self.sqlSpendingData.datetime.iloc[5] - self.sqlSpendingData.datetime.iloc[0])
+        date_difference = self.sqlSpendingData.datetime.iloc[5] - self.sqlSpendingData.datetime.iloc[0]
+        print(date_difference)
+        print(self.sqlSpendingData.datetime.iloc[0].day)
+        print(self.sqlSpendingData.datetime.iloc[0].month)
 
 
         dailySpendingMeans = []
         dailyCategoryMeansDict = {'Living':[], 'Food':[], 'Medical':[], 'Transportation':[], 'Kitties':[], 'Shopping':[], 'Entertainment':[], 'Sport':[], 'Travel':[], 'Misc':[]}
-        dateDiff = (pd.datetime.today() - self.sqldata.datetime.iloc[0]).days
-        dateList = pd.date_range(pd.to_datetime(self.sqldata.datetime.iloc[0]), periods=dateDiff).tolist()
+        dateDiff = (datetime.date.today() - self.sqlSpendingData.datetime.iloc[0]).days
+        dateList = pd.date_range(pd.to_datetime(self.sqlSpendingData.datetime.iloc[0]), periods=dateDiff).tolist()
         
         for date in dateList:
             if (date.day < date.days_in_month) and (date.day > 1):
                 dayPrior = date.replace(date.year, date.month, date.day-1)
                 dayAfter = date.replace(date.year, date.month, date.day+1)
-                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
-                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata['investment_period'] == 1)]
+                filteredDataFrame = self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayPrior) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData['investment_period'] == 1)]
                 dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        categoricalDataFrame =  self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayAfter) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData.category_id == value) & (self.sqlSpendingData['investment_period'] == 1)]
                         dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 1))
 
 
             elif date.day == 1:
                 dayPrior = date.replace(date.year, (date.month)-1, date.replace(date.year, (date.month)-1).days_in_month)
                 dayAfter = date.replace(date.year, date.month, date.day+1)
-                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
-                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata['investment_period'] == 1)]
+                filteredDataFrame = self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayPrior) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData['investment_period'] == 1)]
                 dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        categoricalDataFrame =  self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayPrior) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData.category_id == value) & (self.sqlSpendingData['investment_period'] == 1)]
                         dailyCategoryMeansDict[key].append(round((categoricalDataFrame.sum() / 3), 1))
 
             else:
                 dayPrior = date.replace(date.year, date.month, date.day-1)
                 dayAfter = date.replace(date.year, (date.month)+1, 1)
-                dayPriorString = f"{dayPrior.year}-{dayPrior.month}-{dayPrior.day}"
-                dayAfterString = f"{dayAfter.year}-{dayAfter.month}-{dayAfter.day}"
-                filteredDataFrame = self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.investment_period <= 1) & (self.sqldata['investment_period'] == 1)]
+                filteredDataFrame = self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayPrior) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData.investment_period <= 1) & (self.sqlSpendingData['investment_period'] == 1)]
                 dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
 
                 for key, value in category_check_list.items():
                     if value < 30:
-                        categoricalDataFrame =  self.sqldata['amount'][(self.sqldata['datetime'] >= dayPriorString) & (self.sqldata['datetime'] <= dayAfterString) & (self.sqldata.category_id == value) & (self.sqldata['investment_period'] == 1)]
+                        categoricalDataFrame =  self.sqlSpendingData['amount'][(self.sqlSpendingData['datetime'] >= dayPrior) & (self.sqlSpendingData['datetime'] <= dayAfter) & (self.sqlSpendingData.category_id == value) & (self.sqlSpendingData['investment_period'] == 1)]
                         dailyCategoryMeansDict[key].append(int(round((categoricalDataFrame.sum() / 3), 1)))
 
         for key, value in dailyCategoryMeansDict.items():
@@ -226,60 +232,108 @@ class Budget:
         if int(dailyCategoryMeansDF['Avg. Daily Spending'].max()) > int(float(self.avgDailyIncome)):
             ymax = int(dailyCategoryMeansDF['Avg. Daily Spending'].max())
         else:
-            ymax = int(self.avgDailyIncome)
+            ymax = int(float(self.avgDailyIncome))
 
         axes = plt.gca()
         axes.set_ylim(0,ymax)
         plt.show()
 
     def spendingAnalysis(self):
-        self.getLastMonthToday()
-        self.getTotalSpending()
-        self.getAvgDailySpending()
         self.getPandasDataFrame()
         self.analyzePandasDataFrame()
 
     def getBudgetPandasDataFrame(self):
         
-        groupExpenses = []
+        conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+        try:
+            sql = f'''SELECT 
+                            datetime, 
+                            amount, 
+                            (amount/investment_period) AS amount_inv, 
+                            category_id, 
+                            investment_period, 
+                            comment_text 
+                    FROM 
+                            year_record
+                    WHERE 
+                            category_id < 40
+                    ORDER BY 
+                            datetime, 
+                            category_id, 
+                            amount;'''
 
-        for categoryNum in range(0,4,1):
-            
-            conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
-            cur = conn.cursor()
+        except Exception as err:
+            print("Couldn't execute SQL query to import data as Pandas DataFrame")
+            print(err)
 
-            if categoryNum == 0:
-                query = f'''SELECT SUM(amount) FROM year_record
-                        WHERE datetime > '2019-10-18'
-                        AND datetime > '{self.lastMonthToday}'
-                        AND category_id < {(categoryNum+2)*10};
-                        '''
-            else:
-                query = f'''SELECT SUM(amount) FROM year_record
-                        WHERE datetime > '2019-10-18'
-                        AND datetime > '{self.lastMonthToday}'
-                        AND category_id > {(categoryNum+1)*10}
-                        AND category_id < {(categoryNum+2)*10};
-                        '''
-            try:
-                cur.execute(query)
-            except Exception as err:
-                print("\nSomething clearly went wrong here...")
-                print(f"\n\t{err}")
-            else:
-                
-                result = cur.fetchone()
+        else:
+            self.sqlBudgetData = pd.read_sql_query(sql, conn)
 
-                if categoryNum == 0:
-                    print(f"'Living' this month: {result[0]}")
+        finally:
+            conn.close()
+
+        print(self.sqlBudgetData.head())
+
+    def analyzeBudget(self):
+        '''
+        This function has its sole purpose of analyzing the Budget Data available and comparing it to the budget settings that the user has set
+        '''
+        today = datetime.date.today()
+        startDate = today
+
+        # Due to uncertainties concerning the dates we pay rent, there may be occasions where jumping a month back in time might include double rents.
+        # Therefore, double rents need to be checked for and taken in to account when making the budget calculations.
+        doubleRent = self.checkForDoubleRent()
+
+        budgetDict = {'Income %':[0,0,0,0]}
+
+        for invNum in range(1,25,1):
+            if today.month <= invNum:
+                monthsDiff = abs(today.month - invNum)
+                if monthsDiff < 12:
+                    startDate = today.replace(today.year - 1, 12-monthsDiff)
                 else:
-                    print(f"'Expenses' this month: {result[0]}")
+                    startDate = today.replace(today.year - 2, 24-monthsDiff)
+            else:
+                monthsDiff = abs(today.month - invNum)
+                startDate = today.replace(today.year, today.month - monthsDiff)
 
-                groupExpenses[categoryNum] = result[0]
+            budgetDict['Income %'][0] += int(round((self.sqlBudgetData['amount_inv'][(self.sqlBudgetData['category_id'] < 20) & (self.sqlBudgetData['investment_period'] == invNum) & (self.sqlBudgetData['datetime'] >= startDate)].sum()),2))
+            budgetDict['Income %'][1] += int(round((self.sqlBudgetData['amount_inv'][(self.sqlBudgetData['category_id'] > 20) & (self.sqlBudgetData['category_id'] < 30) & (self.sqlBudgetData['investment_period'] == invNum) & (self.sqlBudgetData['datetime'] >= startDate)].sum()),2))
+            budgetDict['Income %'][2] += int(round((self.sqlBudgetData['amount_inv'][(self.sqlBudgetData['category_id'] > 30) & (self.sqlBudgetData['category_id'] < 40) & (self.sqlBudgetData['investment_period'] == invNum) & (self.sqlBudgetData['datetime'] >= startDate)].sum()),2))
 
-            finally:
-                conn.close()
+        budgetDict['Income %'][0] = int(round(((budgetDict['Income %'][0] - doubleRent) / self.thisMonthIncome),2)*100)
+        budgetDict['Income %'][1] = int(round((budgetDict['Income %'][1] / self.thisMonthIncome),2)*100)
+        budgetDict['Income %'][2] = int(round((budgetDict['Income %'][2] / self.thisMonthIncome),2)*100)
 
+        if (budgetDict['Income %'][0] + budgetDict['Income %'][1] + budgetDict['Income %'][2]) >= 100:
+            budgetDict['Income %'][3] = 0
+        else:
+            budgetDict['Income %'][3] = int(100 - int(budgetDict['Income %'][0]) - int(budgetDict['Income %'][1]) - int(budgetDict['Income %'][2]))
+
+        budgetIndexList = ['Living', 'Expenses', 'Debts & Savings', 'Rest']
+
+        budgetDF = pd.DataFrame(budgetDict, index=budgetIndexList)
+        print(budgetDF)
+
+        budgetDF.plot.pie(y='Income %')
+        budgetDF.plot.bar()
+        plt.show()
+
+    def checkForDoubleRent(self):
+        today = datetime.date.today()
+        if today.month == 1:
+            startDate = today.replace(today.year-1, 12)
+        else:
+            startDate = today.replace(today.year, today.month - 1)
+
+        rentThisMonth = self.sqlBudgetData['amount'][(self.sqlBudgetData['comment_text'] == 'Rent') & (self.sqlBudgetData['datetime'] >= startDate)].sum()
+
+        if rentThisMonth >= 36000:
+            print("\n\t DOUBLE RENT THIS MONTH\n")
+            return int(rentThisMonth/2)
+        else:
+            return 0
 
     def budgetAnalysis(self):
         self.getBudgetPandasDataFrame()

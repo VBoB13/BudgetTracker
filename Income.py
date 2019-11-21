@@ -6,11 +6,12 @@ category_check_list = {'Income':41, 'Other Income':42}
 
 class Income:
 
-	def __init__(self, time, category, amount, comment):
+	def __init__(self, time, category, amount, comment, investmentPeriod=1):
 		self.time = time
 		self.category = category
 		self.amount = amount
 		self.comment = comment
+		self.investmentPeriod = investmentPeriod
 
 	def __str__(self):
 		return f"\n\t{self.amount} received on {self.time}\n\tCategory: {self.category}\n\tComment: {self.comment}"

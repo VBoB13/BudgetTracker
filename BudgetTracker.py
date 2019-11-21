@@ -91,7 +91,7 @@ def inputIncome(incomeInfo):
 		print("Wasn't able to properly derive values from input.")
 		print(err)
 	else:
-		if len(incomeInfoList[0]) == 8 and len(incomeInfoList) == 4:
+		if len(incomeInfoList[0]) == 8 and len(incomeInfoList) <= 5:
 			try:
 				# If the date-spot in the list has the correct length, we attempt to extract the value of entered year, month and date 
 				# through list index slicing and directly put it into a variable that is of the class 'datetime'
@@ -114,6 +114,7 @@ def inputIncome(incomeInfo):
 						print("Wasn't able to load income amount data into variable.")
 						print(err)
 					else:
+						
 						try:
 							# Attempt to put the comment-data that was prompted by the user into 'incomeComment'
 							incomeComment = incomeInfoList[3]
@@ -122,8 +123,20 @@ def inputIncome(incomeInfo):
 							print(err)
 						else:
 							# Creating an income object called 'income' for convenience.
-							income = Income(incomeDate, incomeCategory, incomeAmount, incomeComment)
-							return income
+							if len(incomeInfoList) == 4:
+								income = Income(incomeDate, incomeCategory, incomeAmount, incomeComment)
+								return income
+							else:
+								try:
+									# Attempt to put the investment period that was prompted by the user into 'investment_period'
+									incomeInvestmentPeriod = incomeInfoList[4]
+								except Exception as err:
+									print("Wasn't able to load income investment period data into variable.")
+									print(err)
+								else:
+									# Creating an income object called 'income' for convenience.
+									income = Income(incomeDate, incomeCategory, incomeAmount, incomeComment, incomeInvestmentPeriod)
+									return income
 
 		else:
 			print("Invalid date input (too long/short).")
@@ -217,18 +230,18 @@ while master_input:
 		elif menu_choice == 3:
 			print("\nYou chose 3: Analyze Budget")
 			currentBudget = Budget()
-			currentBudget.getLastMonthToday()
-			currentBudget.getThisMonthIncome()
 
 			while True:
 				try:
-				 	budget_choice = int(input("\t Put in the number for the kind of alanysis you would like: \n1 : Spending Analysis\n2 : Saving Analysis\n3 : Budget Settings\n4 : Back to Main Menu"))
+				 	budget_choice = int(input("\t Put in the number for the kind of alanysis you would like: \n1 : Spending Analysis\n2 : Budget & Saving Analysis\n3 : Budget Settings\n4 : Back to Main Menu\n\n\tYour Choice: "))
 				except Exception as err:
 					print("\n\t <<< Stick to the NUMBERS... Keyword: NUMBERS >>>")
 					print(err)
 				else:
 					if budget_choice == 1:
 						currentBudget.spendingAnalysis()
+					elif budget_choice == 2:
+						currentBudget.budgetAnalysis()
 					else:
 						break
 
