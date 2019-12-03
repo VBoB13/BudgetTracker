@@ -81,28 +81,37 @@ class Budget:
         Function used to initialize the budget ratios every time the application starts.
         This is simply to always have a budget ready to be used in calculations and (later) determine whether the user needs any spending behavior changed.
         '''
-        today = datetime.date.today()
         totalIncome = 0
 
         conn = pg2.connect(database='BudgetTracker', user='postgres',
                            password=secret, host='localhost', port='5432')
-        cur = conn.cursor()
 
         query = '''
-                SELECT SUM(amount) FROM year_record
-                WHERE datetime > '%s'
-                AND category_id > 40
+                SELECT datetime, 
+                    (amount/investment_period) AS inv_amount,
+                    investment_period,
+                    category_id
+                FROM 
+                    year_record
+                WHERE 
+                    category_id > 40
+                ORDER BY 
+                    datetime DESC
                 '''
 
         try:
-            cur.execute(query % self.lastMonthToday)
+            incomeDF = pd.read_sql_query(query, conn)
         except Exception as err:
             print("\n\t-- Was not able to add data to database --")
             print(f"\t Error: {err}\n")
         else:
-            incomeSQL = cur.fetchone()
-            for row in incomeSQL:
-                totalIncome = row
+
+            for inv_period in range(1,25):
+                today = datetime.date.today()
+                pastDate = today - datetime.timedelta(days=(30*inv_period))
+                totalIncome += incomeDF['inv_amount'][(
+                                                        incomeDF['datetime'] >= pastDate) & (
+                                                        incomeDF['investment_period'] == inv_period)].sum()
 
             self.thisMonthIncome = totalIncome
             self.avgDailyIncome = format(
@@ -193,6 +202,7 @@ class Budget:
             days=(monthrange(today.year, today.month)[1]))
         oneDay = datetime.timedelta(days=1)
         lastMonth = today - oneMonth
+
         dailySpendingMeans = []
         dailyCategoryMeansDict = {
             'Living': [],
@@ -205,14 +215,14 @@ class Budget:
             'Sport': [],
             'Travel': [],
             'Misc': []}
+            
         dateDiff = (today - self.sqlSpendingData['datetime'].iloc[0]).days
         dateList = pd.date_range(
             pd.to_datetime(
                 self.sqlSpendingData['datetime'].iloc[0]),
             periods=dateDiff).tolist()
 
-        doubleRent = (self.getRentDailyAvg(
-            self.sqlSpendingData['datetime'].iloc[0]) / 30)
+        avgRent = self.getRentDailyAvg()
 
         for date in dateList:
 
@@ -223,8 +233,9 @@ class Budget:
                 (self.sqlSpendingData['datetime'] >= dayPrior) & (
                     self.sqlSpendingData['datetime'] <= dayAfter) & (
                     self.sqlSpendingData['category_id'] < 40) & (
-                    self.sqlSpendingData['investment_period'] == 1)]
-            dailySpendingMeans.append(round((filteredDataFrame.sum() / 3), 1))
+                    self.sqlSpendingData['investment_period'] == 1) & (
+                    self.sqlSpendingData['comment_text'] != 'Rent')]
+            dailySpendingMeans.append(round(((filteredDataFrame.sum() + avgRent*3) / 3), 1))
 
             for key, value in category_check_list.items():
 
@@ -233,7 +244,8 @@ class Budget:
                         (self.sqlSpendingData['datetime'] >= dayPrior) & (
                             self.sqlSpendingData['datetime'] <= dayAfter) & (
                             self.sqlSpendingData['category_id'] == value) & (
-                            self.sqlSpendingData['investment_period'] == 1)]
+                            self.sqlSpendingData['investment_period'] == 1) & (
+                            self.sqlSpendingData['comment_text'] != 'Rent')]
                     categoryLongTerm = 0
 
                     for inv_period in range(2, 25, 1):
@@ -244,7 +256,7 @@ class Budget:
 
                     if value == 11:
                         dailyCategoryMeansDict[key].append(int(
-                            round(((categoricalDataFrame.sum() + categoryLongTerm - doubleRent) / 3), 1)))
+                            round(((categoricalDataFrame.sum() + categoryLongTerm + avgRent*3) / 3), 1)))
                     else:
                         dailyCategoryMeansDict[key].append(
                             int(round(((categoricalDataFrame.sum() + categoryLongTerm) / 3), 1)))
@@ -400,7 +412,7 @@ class Budget:
         budgetDF.plot.bar()
         plt.show()
 
-    def getRentDailyAvg(self, date):
+    def getRentDailyAvg(self):
 
         rentThisMonth = 0
         totalRent = 0
@@ -422,10 +434,10 @@ class Budget:
                 self.sqlSpendingData['comment_text'] == 'Rent')].sum()
             rentThisMonth = totalRent / \
                 len(self.sqlSpendingData['amount'][(
-                    self.sqlBudgetData['comment_text'] == 'Rent')].index)
+                    self.sqlSpendingData['comment_text'] == 'Rent')].index)
         finally:
 
-            return rentThisMonth / daysInCurrentMonth
+            return int(round((rentThisMonth / daysInCurrentMonth),0))
 
     def budgetAnalysis(self):
         self.getBudgetPandasDataFrame()
