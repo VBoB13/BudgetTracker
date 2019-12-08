@@ -186,7 +186,7 @@ class Budget:
                         amount;'''
 
         except Exception as err:
-            print("Couldn't execute SQL query to import data as Pandas DataFrame")
+            print("\n\n\t -- Error: Couldn't execute SQL query to import data as Pandas DataFrame --\n\n")
             print(err)
 
         else:
@@ -215,7 +215,7 @@ class Budget:
             'Sport': [],
             'Travel': [],
             'Misc': []}
-            
+
         dateDiff = (today - self.sqlSpendingData['datetime'].iloc[0]).days
         dateList = pd.date_range(
             pd.to_datetime(
@@ -251,8 +251,10 @@ class Budget:
                     for inv_period in range(2, 25, 1):
                         pastDate = today - \
                             datetime.timedelta(days=(30 * inv_period))
-                        categoryLongTerm += self.sqlSpendingData['inv_amount'][(self.sqlSpendingData['datetime'] >= pastDate) & (
-                            self.sqlSpendingData['investment_period'] == inv_period) & (self.sqlSpendingData['category_id'] == value)].sum()
+                        categoryLongTerm += self.sqlSpendingData['inv_amount'][
+                            (self.sqlSpendingData['datetime'] >= pastDate) & (
+                                self.sqlSpendingData['investment_period'] == inv_period) & (
+                                self.sqlSpendingData['category_id'] == value)].sum()
 
                     if value == 11:
                         dailyCategoryMeansDict[key].append(int(
@@ -367,24 +369,28 @@ class Budget:
                 monthsDiff = abs(today.month - invNum)
                 startDate = today.replace(today.year, today.month - monthsDiff)
 
-            budgetDict['Income %'][0] += int(round((self.sqlBudgetData['amount_inv'][(self.sqlBudgetData['category_id'] < 20) & (
-                self.sqlBudgetData['investment_period'] == invNum) & (self.sqlBudgetData['datetime'] >= startDate)].sum()), 2))
+            budgetDict['Income %'][0] += int(
+                round((self.sqlBudgetData['amount_inv'][
+                        (self.sqlBudgetData['category_id'] < 20) & (
+                            self.sqlBudgetData['investment_period'] == invNum) & (
+                            self.sqlBudgetData['datetime'] >= startDate)
+                            ].sum()),2))
             budgetDict['Income %'][1] += int(
                 round(
                     (self.sqlBudgetData['amount_inv'][
                         (self.sqlBudgetData['category_id'] > 20) & (
                             self.sqlBudgetData['category_id'] < 30) & (
                             self.sqlBudgetData['investment_period'] == invNum) & (
-                            self.sqlBudgetData['datetime'] >= startDate)].sum()),
-                    2))
+                            self.sqlBudgetData['datetime'] >= startDate)
+                            ].sum()),2))
             budgetDict['Income %'][2] += int(
                 round(
                     (self.sqlBudgetData['amount_inv'][
                         (self.sqlBudgetData['category_id'] > 30) & (
                             self.sqlBudgetData['category_id'] < 40) & (
                             self.sqlBudgetData['investment_period'] == invNum) & (
-                            self.sqlBudgetData['datetime'] >= startDate)].sum()),
-                    2))
+                            self.sqlBudgetData['datetime'] >= startDate)
+                            ].sum()),2))
 
         budgetDict['Income %'][0] = int(
             round((budgetDict['Income %'][0] / self.thisMonthIncome), 2) * 100)
