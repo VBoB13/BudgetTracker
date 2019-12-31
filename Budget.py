@@ -3,6 +3,7 @@ import datetime
 from calendar import monthrange
 import psycopg2 as pg2
 import pandas as pd
+import seaborn as sns
 from matplotlib import pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
@@ -362,9 +363,15 @@ class Budget:
             if today.month <= invNum:
                 monthsDiff = abs(today.month - invNum)
                 if monthsDiff < 12:
-                    startDate = today.replace(today.year - 1, 12 - monthsDiff)
+                    if today.day == 31:
+                        startDate = today.replace(today.year - 1, 12 - monthsDiff, 30)
+                    else:
+                        startDate = today.replace(today.year - 1, 12 - monthsDiff)
                 else:
-                    startDate = today.replace(today.year - 2, 24 - monthsDiff)
+                    if today.day == 31:
+                        startDate = today.replace(today.year - 2, 24 - monthsDiff, 30)
+                    else:
+                        startDate = today.replace(today.year - 2, 24 - monthsDiff)
             else:
                 monthsDiff = abs(today.month - invNum)
                 startDate = today.replace(today.year, today.month - monthsDiff)

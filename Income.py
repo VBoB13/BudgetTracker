@@ -36,12 +36,13 @@ class Income:
             cur = conn.cursor()
             try:
                 cur.execute(
-                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text) VALUES (%s, %s, %s, %s, %s)",
+                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text) VALUES (%s, %s, %s, %s, %s, %s)",
                     (self.time,
                      self.category,
                      category_id,
                      self.amount,
-                     self.comment))
+                     self.comment,
+                     self.investmentPeriod))
             except Exception as err:
                 print("Was not able to add data to database")
                 print(err)
