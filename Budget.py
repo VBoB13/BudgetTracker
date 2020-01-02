@@ -61,18 +61,7 @@ class Budget:
         # If it has less days, then the date is subtracted by the amount of days that the current month has MORE than the previous one
         # This then gets converted into a string for later use in database
         # queries
-        if monthrange(
-                today.year,
-                today.month -
-                1)[1] < monthrange(
-                today.year,
-                today.month)[1]:
-            maxDaysDiff = monthrange(today.year, today.month)[
-                1] - monthrange(today.year, today.month - 1)[1]
-            self.lastMonthToday = str(today.replace(
-                month=(today.month - 1), day=(today.day - maxDaysDiff)))
-        else:
-            self.lastMonthToday = str(today.replace(month=(today.month - 1)))
+        self.lastMonthToday = str(self.getStartDate(1))
 
         print(self.lastMonthToday)
 
@@ -122,6 +111,8 @@ class Budget:
             conn.close()
 
     def getTotalSpending(self):
+
+        totalSpending = 0
 
         conn = pg2.connect(database='BudgetTracker', user='postgres',
                            password=secret, host='localhost', port='5432')
