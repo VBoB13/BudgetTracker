@@ -47,7 +47,6 @@ class Budget:
         self.getLastMonthToday()
         self.getThisMonthIncome()
         self.getTotalSpending()
-        self.getAvgDailySpending()
 
     def __str__(self):
         if self.avgDailySpending == 0:
@@ -109,7 +108,8 @@ class Budget:
 
             for inv_period in range(1,25):
                 today = datetime.date.today()
-                pastDate = today - datetime.timedelta(days=(30*inv_period))
+                pastDate = today - datetime.timedelta(days=(31*inv_period))
+                print(f"\n\nChecking income data since {pastDate} with investment_period = {inv_period}")
                 totalIncome += incomeDF['inv_amount'][(
                                                         incomeDF['datetime'] >= pastDate) & (
                                                         incomeDF['investment_period'] == inv_period)].sum()
@@ -125,47 +125,75 @@ class Budget:
 
         conn = pg2.connect(database='BudgetTracker', user='postgres',
                            password=secret, host='localhost', port='5432')
-        cur = conn.cursor()
+
         query = '''
-                SELECT SUM(amount) FROM year_record
-                WHERE datetime > '%s'
-                AND category_id <= 31
+                SELECT datetime, 
+                    (amount/investment_period) AS inv_amount,
+                    investment_period,
+                    category_id
+                FROM 
+                    year_record
+                WHERE 
+                    category_id < 30
+                ORDER BY 
+                    datetime DESC
                 '''
 
         try:
-            cur.execute(query % self.lastMonthToday)
+            spendingDF = pd.read_sql_query(query, conn)
         except Exception as err:
-            print("\nSomething clearly went wrong here...")
-            print(f"\n\t{err}")
+            print("\n\t-- Was not able to add data to database --")
+            print(f"\t Error: {err}\n")
         else:
-            result = cur.fetchone()
-            print(
-                f"Total Spending since {self.lastMonthToday}:\n\t${result[0]} NT\n\n")
+
+            for inv_period in range(1,25):
+                today = datetime.date.today()
+                pastDate = self.getStartDate(inv_period)
+                print(f"\n\nChecking spending data since {pastDate} with investment_period = {inv_period}")
+                totalSpending += spendingDF['inv_amount'][(
+                                                        spendingDF['datetime'] >= pastDate) & (
+                                                        spendingDF['investment_period'] == inv_period)].sum()
+
+            self.totalSpending = totalSpending
+            self.avgDailySpending = format(
+                totalSpending / (monthrange(today.year, today.month)[1]), '.1f')
+            print(self)
         finally:
             conn.close()
 
-        self.totalSpending = result[0]
+    def getStartDate(self, num_months):
+        
+        today = datetime.date.today()
 
-    def getAvgDailySpending(self):
+        if today.month <= num_months:
+            monthsDiff = abs(today.month - num_months)
+            if monthsDiff < 12:
+                
+                # Getting the lowest number of maximum days in either the current month or the 'target' month
+                lastDateOfMonth = min([
+                                        monthrange(today.year - 1, 12 - monthsDiff)[1], 
+                                        monthrange(today.year, today.month)[1]
+                                        ])
 
-        conn = pg2.connect(database='BudgetTracker', user='postgres',
-                           password=secret, host='localhost', port='5432')
-        cur = conn.cursor()
-        query = "SELECT ROUND(AVG(amount),1) FROM year_record WHERE datetime > '%s' AND category_id < 30"
+                startDate = today.replace(today.year - 1, 12 - monthsDiff, min([lastDateOfMonth, today.day]))
+            else:
+                # Getting the lowest number of maximum days in either the current month or the 'target' month
+                lastDateOfMonth = min([monthrange(today.year - 2, 24 - monthsDiff)[1], 
+                                        monthrange(today.year, today.month)[1]])
 
-        try:
-            cur.execute(query % self.lastMonthToday)
-        except Exception as err:
-            print("\nSomething clearly went wrong here...")
-            print(f"\n\t{err}")
+                startDate = today.replace(today.year - 2, 24 - monthsDiff, min([lastDateOfMonth, today.day]))
+
         else:
-            result = cur.fetchone()
-            print(
-                f"Avg. Daily Spending since {self.lastMonthToday}: {result[0]} \n\t(Excluding 'Debts & Savings') \n\n")
-        finally:
-            conn.close()
+            monthsDiff = abs(today.month - num_months)
+            # Getting the lowest number of maximum days in either the current month or the 'target' month
+            lastDateOfMonth = min([
+                                    monthrange(today.year - 1, 12 - monthsDiff)[1], 
+                                    monthrange(today.year, today.month)[1]
+                                    ])
+            startDate = today.replace(today.year, 12 - monthsDiff, min([lastDateOfMonth, today.day]))
 
-        self.avgDailySpending = result[0]
+        return startDate
+
 
     def getPandasDataFrame(self):
         conn = pg2.connect(database='BudgetTracker', user='postgres',
@@ -360,21 +388,7 @@ class Budget:
         budgetDict = {'Income %': [0, 0, 0, 0]}
 
         for invNum in range(1, 25, 1):
-            if today.month <= invNum:
-                monthsDiff = abs(today.month - invNum)
-                if monthsDiff < 12:
-                    if today.day == 31:
-                        startDate = today.replace(today.year - 1, 12 - monthsDiff, 30)
-                    else:
-                        startDate = today.replace(today.year - 1, 12 - monthsDiff)
-                else:
-                    if today.day == 31:
-                        startDate = today.replace(today.year - 2, 24 - monthsDiff, 30)
-                    else:
-                        startDate = today.replace(today.year - 2, 24 - monthsDiff)
-            else:
-                monthsDiff = abs(today.month - invNum)
-                startDate = today.replace(today.year, today.month - monthsDiff)
+            startDate = self.getStartDate(invNum)
 
             budgetDict['Income %'][0] += int(
                 round((self.sqlBudgetData['amount_inv'][
