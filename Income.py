@@ -36,7 +36,7 @@ class Income:
             cur = conn.cursor()
             try:
                 cur.execute(
-                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text) VALUES (%s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text, investment_period) VALUES (%s, %s, %s, %s, %s, %s)",
                     (self.time,
                      self.category,
                      category_id,

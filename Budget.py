@@ -1,6 +1,7 @@
 from FileLoader import FileLoader
 import datetime
 from calendar import monthrange
+import numpy as np
 import psycopg2 as pg2
 import pandas as pd
 import seaborn as sns
@@ -47,16 +48,15 @@ class Budget:
         self.getLastMonthToday()
         self.getThisMonthIncome()
         self.getTotalSpending()
+        print(self)
 
     def __str__(self):
-        if self.avgDailySpending == 0:
+        if self.avgDailySpending == 0 and self.totalSpending == 0:
             return f"\n\n ------------------------------ \n\n -- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\n ------------------------------ \n\n"
         else:
-            return f"\n\n ------------------------------ \n\n -- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}\n\n ------------------------------ \n\n"
+            return f"\n\n ------------------------------ \n\n -- Current Budget Settings -- \n\tLiving Costs: {self.livingRatio * 100}%\n\tExpenses: {self.expensesRatio * 100}%\n\tSaving Ratio: {self.savingsRatio * 100}%\n\n -- General Income & Spending Data --\n\tCurrent month income: {self.thisMonthIncome}\n\tCurrent month total spending: {self.totalSpending}\n\tDaily Income (avg): {self.avgDailyIncome}\n\tDaily Spending (avg): {self.avgDailySpending}\n\n ------------------------------ \n\n"
 
     def getLastMonthToday(self):
-        today = datetime.date.today()
-
         # Checks to see whether the previous month has less amount of days than the current one
         # If it has less days, then the date is subtracted by the amount of days that the current month has MORE than the previous one
         # This then gets converted into a string for later use in database
@@ -97,8 +97,7 @@ class Budget:
 
             for inv_period in range(1,25):
                 today = datetime.date.today()
-                pastDate = today - datetime.timedelta(days=(31*inv_period))
-                print(f"\n\nChecking income data since {pastDate} with investment_period = {inv_period}")
+                pastDate = self.getStartDate(inv_period)
                 totalIncome += incomeDF['inv_amount'][(
                                                         incomeDF['datetime'] >= pastDate) & (
                                                         incomeDF['investment_period'] == inv_period)].sum()
@@ -106,7 +105,7 @@ class Budget:
             self.thisMonthIncome = totalIncome
             self.avgDailyIncome = format(
                 totalIncome / (monthrange(today.year, today.month)[1]), '.1f')
-            print(self)
+            
         finally:
             conn.close()
 
@@ -140,7 +139,6 @@ class Budget:
             for inv_period in range(1,25):
                 today = datetime.date.today()
                 pastDate = self.getStartDate(inv_period)
-                print(f"\n\nChecking spending data since {pastDate} with investment_period = {inv_period}")
                 totalSpending += spendingDF['inv_amount'][(
                                                         spendingDF['datetime'] >= pastDate) & (
                                                         spendingDF['investment_period'] == inv_period)].sum()
@@ -148,7 +146,7 @@ class Budget:
             self.totalSpending = totalSpending
             self.avgDailySpending = format(
                 totalSpending / (monthrange(today.year, today.month)[1]), '.1f')
-            print(self)
+
         finally:
             conn.close()
 
@@ -169,8 +167,10 @@ class Budget:
                 startDate = today.replace(today.year - 1, 12 - monthsDiff, min([lastDateOfMonth, today.day]))
             else:
                 # Getting the lowest number of maximum days in either the current month or the 'target' month
-                lastDateOfMonth = min([monthrange(today.year - 2, 24 - monthsDiff)[1], 
-                                        monthrange(today.year, today.month)[1]])
+                lastDateOfMonth = min([
+                                        monthrange(today.year - 2, 24 - monthsDiff)[1], 
+                                        monthrange(today.year, today.month)[1]
+                                        ])
 
                 startDate = today.replace(today.year - 2, 24 - monthsDiff, min([lastDateOfMonth, today.day]))
 
@@ -196,7 +196,8 @@ class Budget:
                         (amount/investment_period) AS inv_amount,
                         category_id,
                         investment_period,
-                        comment_text
+                        comment_text,
+                        transource
                     FROM year_record
                     WHERE
                         category_id < 40
@@ -217,11 +218,9 @@ class Budget:
 
     def getTimeFrameMeans(self):
 
+        print("\n\n --------------- \n\nGetting Time-Frame means...\n\n --------------- \n\n")
         today = datetime.date.today()
-        oneMonth = datetime.timedelta(
-            days=(monthrange(today.year, today.month)[1]))
         oneDay = datetime.timedelta(days=1)
-        lastMonth = today - oneMonth
 
         dailySpendingMeans = []
         dailyCategoryMeansDict = {
@@ -245,43 +244,48 @@ class Budget:
         avgRent = self.getRentDailyAvg()
 
         for date in dateList:
+            print(f"\n\n --------------- \n\nGetting mean for {date} ...\n\n --------------- \n\n")
 
             dayPrior = date - oneDay
             dayAfter = date + oneDay
 
-            filteredDataFrame = self.sqlSpendingData['inv_amount'][
-                (self.sqlSpendingData['datetime'] >= dayPrior) & (
-                    self.sqlSpendingData['datetime'] <= dayAfter) & (
-                    self.sqlSpendingData['category_id'] < 40) & (
-                    self.sqlSpendingData['investment_period'] == 1) & (
-                    self.sqlSpendingData['comment_text'] != 'Rent')]
+            filteredDataFrame = self.sqlSpendingData['inv_amount'][(
+                                                                    self.sqlSpendingData['datetime'] >= dayPrior) & (
+                                                                    self.sqlSpendingData['datetime'] <= dayAfter) & (
+                                                                    self.sqlSpendingData['category_id'] < 40) & (
+                                                                    self.sqlSpendingData['investment_period'] == 1) & (
+                                                                    self.sqlSpendingData['comment_text'] != 'Rent'
+                                                                    )]
+
             dailySpendingMeans.append(round(((filteredDataFrame.sum() + avgRent*3) / 3), 1))
 
             for key, value in category_check_list.items():
 
                 if value < 30:
-                    categoricalDataFrame = self.sqlSpendingData['inv_amount'][
-                        (self.sqlSpendingData['datetime'] >= dayPrior) & (
-                            self.sqlSpendingData['datetime'] <= dayAfter) & (
-                            self.sqlSpendingData['category_id'] == value) & (
-                            self.sqlSpendingData['investment_period'] == 1) & (
-                            self.sqlSpendingData['comment_text'] != 'Rent')]
+                    categoricalDataFrame = self.sqlSpendingData['inv_amount'][(
+                                                                                self.sqlSpendingData['datetime'] >= dayPrior) & (
+                                                                                self.sqlSpendingData['datetime'] <= dayAfter) & (
+                                                                                self.sqlSpendingData['category_id'] == value) & (
+                                                                                self.sqlSpendingData['investment_period'] == 1) & (
+                                                                                self.sqlSpendingData['comment_text'] != 'Rent'
+                                                                                )]
+
                     categoryLongTerm = 0
 
                     for inv_period in range(2, 25, 1):
-                        pastDate = today - \
-                            datetime.timedelta(days=(30 * inv_period))
-                        categoryLongTerm += self.sqlSpendingData['inv_amount'][
-                            (self.sqlSpendingData['datetime'] >= pastDate) & (
-                                self.sqlSpendingData['investment_period'] == inv_period) & (
-                                self.sqlSpendingData['category_id'] == value)].sum()
+                        pastDate = self.getStartDate(inv_period)
+                        categoryLongTerm += self.sqlSpendingData['inv_amount'][(
+                                                                                self.sqlSpendingData['datetime'] >= pastDate) & (
+                                                                                self.sqlSpendingData['investment_period'] == inv_period) & (
+                                                                                self.sqlSpendingData['category_id'] == value
+                                                                                )].sum() / monthrange(today.year, today.month)[1]
 
                     if value == 11:
                         dailyCategoryMeansDict[key].append(int(
-                            round(((categoricalDataFrame.sum() + categoryLongTerm + avgRent*3) / 3), 1)))
+                            round(((categoricalDataFrame.sum() / 3) + categoryLongTerm + avgRent), 1)))
                     else:
                         dailyCategoryMeansDict[key].append(
-                            int(round(((categoricalDataFrame.sum() + categoryLongTerm) / 3), 1)))
+                            int(round(((categoricalDataFrame.sum() / 3) + categoryLongTerm), 1)))
 
         for key, value in dailyCategoryMeansDict.items():
             print(f"\n{key}:\n{value}\n")
@@ -307,12 +311,55 @@ class Budget:
 
         return dailyCategoryMeansDF
 
+    def getMeal(self, comment_text):
+        '''
+        This function is used as an Pandas.DataFrame.apply() function
+
+        PARAMETERS:
+        - comment_text (as derived from database [PostgreSQL type: varchar(50)])
+
+        OUTPUT:
+        - foodDF (type: Pandas DataFrame) with an extra column of categorical variable "Meal"
+        '''
+        
+        mealTypes = ['Breakfast', 'Lunch', 'Dinner']
+
+        for meal in mealTypes:
+            if meal in comment_text:
+                return meal
+        
+        return None
+
+    def isMeal(self, meal):
+        if meal in ['Breakfast', 'Lunch', 'Dinner']:
+            return True
+        else:
+            return False
+
+
+    def getFoodData(self):
+        foodDF = self.sqlSpendingData[(self.sqlSpendingData['category_id'] == category_check_list['Food'])].copy()
+        foodDF['Meal'] = foodDF['comment_text'].apply(self.getMeal)
+        meal = foodDF['Meal'].apply(self.isMeal)
+
+        return foodDF[meal]
+
+    def analyzeFood(self):
+        foodDF = self.getFoodData()
+        print(foodDF)
+
+        sns.barplot(x='Meal', y='amount', data=foodDF, hue='transource', palette='bright')
+        plt.show()
+
     def analyzePandasDataFrame(self):
         dailyCategoryMeansDF = self.getTimeFrameMeans()
-        dailyCategoryMeansDF.plot()
+        dailyCategoryMeansDF = dailyCategoryMeansDF[:].apply(pd.to_numeric)
+        sns.set_style(style='darkgrid')
+        sns.lineplot(data=dailyCategoryMeansDF, palette='bright', dashes=False, lw=1.2)
 
-        plt.legend(dailyCategoryMeansDF.columns)
-        plt.xlabel('Time')
+        plt.legend(dailyCategoryMeansDF.columns, loc=(1.0,0), frameon=False)
+        plt.xlim(dailyCategoryMeansDF.index[0], dailyCategoryMeansDF.index[-1])
+        plt.xlabel('Date')
         plt.ylabel('Amount (NTD)')
 
         if int(
@@ -330,6 +377,7 @@ class Budget:
     def spendingAnalysis(self):
         self.getPandasDataFrame()
         self.analyzePandasDataFrame()
+        self.analyzeFood()
 
     def getBudgetPandasDataFrame(self):
 

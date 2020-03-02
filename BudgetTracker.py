@@ -217,11 +217,14 @@ menu_choice = 0
 while master_input:
     try:
         menu_choice = int(input(
-            "\nWhat would you like to do? \n(input corresponding number) \n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n"))
+            "\nWhat would you like to do? \n(input corresponding number) \n\n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n"))
     except Exception as err:
         print("Sorry, we were not able to determine what you would like to do.")
         print(err)
     else:
+
+        # MENU choice 1 - Expenses
+
         if menu_choice == 1:
             print("\nYou chose 1: Expenses\n")
 
@@ -255,6 +258,9 @@ while master_input:
                     else:
                         break
 
+
+        # MENU choice 2 - Income
+
         elif menu_choice == 2:
             print("\nYou chose 2: Income\n")
             incomeInput = True
@@ -272,6 +278,9 @@ while master_input:
                     incomeInput = True
                 else:
                     incomeInput = False
+
+
+        # MENU choice 3 - Analyze Budget
 
         elif menu_choice == 3:
             print("\nYou chose 3: Analyze Budget")
@@ -291,6 +300,9 @@ while master_input:
                         currentBudget.budgetAnalysis()
                     else:
                         break
+
+
+        # MENU choice 4 - Load Data
 
         elif menu_choice == 4:
             print("\nYou chose 4: Load Data")

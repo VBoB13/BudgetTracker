@@ -24,15 +24,16 @@ category_check_list = {
 
 class Expense:
 
-    def __init__(self, time, category, amount, comment, investment_period=1):
+    def __init__(self, time, category, amount, comment='', transource='', investment_period=1):
         self.time = time
         self.category = category
         self.amount = amount
         self.comment = comment
+        self.transource = transource
         self.investment_period = investment_period
 
     def __str__(self):
-        return f"\n -- Details --\n\t${self.amount} NT \n\tCategory: {self.category} \n\tTime: {self.time} \n\tComment: {self.comment}\n\tInvestment period: {self.investment_period} months\n"
+        return f"\n -- Details --\n\t${self.amount} NT \n\tCategory: {self.category} \n\tTime: {self.time} \n\tComment: {self.comment}\n\t Transaction source: {self.transource}\n\tInvestment period: {self.investment_period} months\n"
 
     def editTime(self, time):
         self.time = time
@@ -57,12 +58,13 @@ class Expense:
             cur = conn.cursor()
             try:
                 cur.execute(
-                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text, investment_period) VALUES (%s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO year_record (datetime, category, category_id, amount, comment_text, transource, investment_period) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                     (self.time,
                      self.category,
                      category_id,
                      self.amount,
                      self.comment,
+                     self.transource,
                      self.investment_period))
             except Exception as err:
                 print("Was not able to add data to database")
