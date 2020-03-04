@@ -32,9 +32,9 @@ category_check_list = {
 
 class Budget:
 
-    livingRatio = 0.35
-    expensesRatio = 0.45
-    savingsRatio = 0.2
+    livingRatio = 0.70
+    expensesRatio = 0.10
+    savingsRatio = 0.20
     thisMonthIncome = 0
     avgDailyIncome = 0
     totalSpending = 0
@@ -175,13 +175,12 @@ class Budget:
                 startDate = today.replace(today.year - 2, 24 - monthsDiff, min([lastDateOfMonth, today.day]))
 
         else:
-            monthsDiff = abs(today.month - num_months)
             # Getting the lowest number of maximum days in either the current month or the 'target' month
             lastDateOfMonth = min([
-                                    monthrange(today.year - 1, 12 - monthsDiff)[1], 
+                                    monthrange(today.year, today.month - num_months)[1], 
                                     monthrange(today.year, today.month)[1]
                                     ])
-            startDate = today.replace(today.year, 12 - monthsDiff, min([lastDateOfMonth, today.day]))
+            startDate = today.replace(today.year, today.month - num_months, min([lastDateOfMonth, today.day]))
 
         return startDate
 
@@ -412,6 +411,35 @@ class Budget:
 
         print(self.sqlBudgetData.head())
 
+    def compareBudget(self, budgetDict):
+        '''
+            This function's purpose is simply to take the different percentages from the "analyzeBudget"-function below to compare with the preset settings are.
+            This function will (most likely) be used as one of the many mechanisms for Machine Learning.
+        '''
+        livingText, expensesText, savingsText= "", "", ""
+        
+        comparedLiving = self.livingRatio - (budgetDict['Income %'][0] / 100)
+        comparedExpenses = self.expensesRatio - (budgetDict['Income %'][1] / 100)
+        comparedSavings = self.savingsRatio - (budgetDict['Income %'][2] / 100) - (budgetDict['Income %'][3] / 100)
+
+        if comparedLiving <= 0:
+            livingText = f"\n\n\t Living: -{comparedLiving * 100}%"
+        else:
+            livingText = f"\n\n\t Living: {comparedLiving * 100}%"
+        
+        if comparedExpenses <= 0:
+            expensesText = f"\n\t Expenses: -{comparedExpenses * 100}%"
+        else:
+            expensesText = f"\n\t Expenses: {comparedExpenses * 100}%"
+        
+        if comparedSavings <= 0:
+            savingsText = f"\n\t Debt & Savings: -{comparedSavings * 100}% \n\n"
+        else:
+            savingsText = f"\n\t Debt & Savings: {comparedSavings * 100}% \n\n"
+
+        print(livingText, expensesText, savingsText)
+
+
     def analyzeBudget(self):
         '''
         This function has its sole purpose of analyzing the Budget Data available and comparing it to the budget settings that the user has set
@@ -468,6 +496,9 @@ class Budget:
                                             int(budgetDict['Income %'][0]) -
                                             int(budgetDict['Income %'][1]) -
                                             int(budgetDict['Income %'][2]))
+
+        # Calling "compareBudget" to compare the preset budget settings with the real numbers
+        self.compareBudget(budgetDict)
 
         budgetIndexList = ['Living', 'Expenses', 'Debts & Savings', 'Rest']
 

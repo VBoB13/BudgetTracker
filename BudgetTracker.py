@@ -10,7 +10,7 @@ from Budget import Budget
 
 def inputExpense(expenseInfo):
     '''
-    This function simply takes the expense input from the user and splits, converts and uploads it (if input is correct) to the database.
+    This function simply takes the expense input (string) from the user and splits, converts and uploads it (if input is correct) to the database.
     INPUT: expenseInfo (string)
     Output: expense (Expense)
     '''
@@ -23,7 +23,7 @@ def inputExpense(expenseInfo):
         print("Wasn't able to properly derive values from input.")
         print(err)
     else:
-        if len(expenseInfoList[0]) == 8 and len(expenseInfoList) <= 5:
+        if len(expenseInfoList[0]) == 8 and len(expenseInfoList) <= 6:
             try:
                 # If the date-spot in the list has the correct length, we attempt to extract the value of entered year, month and date
                 # through list index slicing and directly put it into a
@@ -66,7 +66,7 @@ def inputExpense(expenseInfo):
                                 "Successfully loaded all data into variables.\n Attempting to create Expense object.")
                             # Creating an Expense object called 'expense' for
                             # convenience.
-                            if len(expenseInfoList) == 4:
+                            if len(expenseInfoList) == 5:
                                 expense = Expense(
                                     expenseDate, expenseCategory, expenseAmount, expenseComment)
                                 return expense
@@ -74,6 +74,7 @@ def inputExpense(expenseInfo):
                                 try:
                                     expense_inv_period = int(
                                         expenseInfoList[4])
+                                    expenseTransource = str(expenseInfoList[5])
                                 except Exception as err:
                                     print(
                                         "Couldn't convert investment_period data into Python variable.")
@@ -84,6 +85,7 @@ def inputExpense(expenseInfo):
                                         expenseCategory,
                                         expenseAmount,
                                         expenseComment,
+                                        expenseTransource,
                                         expense_inv_period)
                                     return expense
 

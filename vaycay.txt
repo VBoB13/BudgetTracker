@@ -1,0 +1,208 @@
+20200110,Medical,-910,Cut finger(Ric),1,MacKay Memorial Hospital
+20200110,Transportation,606,Fine(Ric),1,Police-Tamsui
+20200110,Food,40,Soy milk,1,Family Mart
+
+20200111,Shopping,790,Clothes-Jeans(Jenn),6,Uniqlo-Tamsui
+20200111,Food,92,Snacks-Doughnut,1,Krispy Kreme-Tamsui
+20200111,Food,300,Coffee,1,Starbucks-Yonghe
+20200111,Shopping,1200,Jeans(Jenn),6,Net-Yonghe
+20200111,Food,1568,Curry-Spices,3,Burmese street
+20200111,Shopping,1340,Fabric for Wendy,1,Fabric store
+20200111,Food,100,Snacks-Fried mushrooms,1,Market-Ximen
+20200111,Food,190,Snacks-Nuts,1,Market-Ximen
+20200111,Food,1000,Snacks-Chinese candy bars,1,Ximen
+20200111,Food,1667,Dinner,1,kooks
+
+20200112,Food,19,Coffee,1,Family Mart
+20200112,Food,19,Beer,1,Family Mart
+20200112,Transportation,30,Parking,1,MRT Tamsui Station
+20200112,Transportation,30,Xindian to Wulai,1,Bus
+20200112,Transportation,48,Tamsui to Xindian District Office,1,MRT
+20200112,Transportation,52,Xindian to Tamsui,1,MRT
+20200112,Food,600,Dinner,1,Wulai Old Street
+20200112,Medical,1000,Massage,1,Xindian Thai Massage
+
+20200113,Food,50,Breakfast,1,Breakfast store
+
+20200114,Food,50,Breakfast,1,Breakfast store
+20200114,Living,871,Phone Bills,1,Chunghwa Telecom
+20200114,Food,115,Lunch(Ric),1,Subway
+20200114,Food,50,Snacks-Cookies(Ric),1,Subway
+20200114,Travel,1400,Hotel-Minneapolis,6,Fairfield Inn-Minneapolis(USA)
+20200114,Travel,1796,Shuttle-MSP to Rochester,6,Rochester Shuttle Service-Minneapolis(USA)
+20200114,Food,300,Dinner,1,foodpanda
+
+20200115,Food,50,Breakfast(Jenn),1,Breakfast store
+20200115,Debt,4062,Student loan,1,CSN
+20200115,Food,150,Lunch,1,foodpanda
+20200115,Food,490,Dinner,1,Uber Eats
+
+20200116,Food,100,Breakfast,1,Breakfast store
+20200116,Food,165,Coffee(Ric),1,Starbucks
+20200116,Medical,452,Psychiatrist,1,Shinyue
+20200116,Shopping,300,Presents-Magnets,6,Souvenir store
+20200116,Shopping,300,Face masks,3,Watson's
+
+20200117,Food,50,Breakfast(Jenn),1,Breakfast store
+20200117,Food,666,Dinner,1,Saboten
+20200117,Shopping,508,Presents-Chocolate,3,Carrefour
+20200117,Shopping,140,Decorations-Hello Kitty,3,Carrefour
+
+20200118,Travel,1100,Taxi-To TPE Airport,6,55688 Taxi
+20200118,Food,330,Coffee,1,Starbucks
+
+20200119,Food,501,Breakfast,1,San Francisco Airport-San Fransisco(USA)
+20200119,Food,1500,Dinner,1,Minneapolis
+
+20200119,Misc,150,Tip,6,Shuttle bus-Minneapolis(USA)
+20200119,Food,240,Coffee,1,McDonald's-Minneapolis(USA)
+
+20200122,Sport,600,Cross country ski rent,6,Decorah bicycle rent-Decorah(USA)
+
+20200123,Living,1800,Hair & beard cut,6,Decorah barbershop-Decorah(USA)
+
+20200125,Food,600,Waffle breakfast,1,Lakeside Elementary School-Solon(USA)
+
+20200127,Food,360,Coffee,1,Coffee Shop-Dubuque(USA)
+
+20200129,Travel,1950,Shuttle-Rochester to MSP Airport,Rochester Shuttle Service-Minneapolis(USA)
+
+20200130,Food,90,Water,1,MSP Airport
+20200130,Travel,1800,Taxi-DEN to Downtown Denver,1,Uber-Denver(USA)
+
+20200131,Food,1965,Spices,3,Savory Spices Shop-Denver(USA)
+20200131,Medical,4963,Stash-Edibles,12,Golden Meds-Denver(USA)
+20200131,Medical,4587,Stash-Live Resin,12,Health Center-Denver(USA)
+
+20200201,Living,361,School supplies,3,The Bookies-Denver(USA)
+20200201,Living,360,School supplies,3,The Bookies-Denver(USA)
+20200201,Shopping,13250,Clothes,12,Nordstrom rack-Denver(USA)
+
+20200202,Food,4884,Dinner,1,Ruth Chris's-Denver(USA)
+
+20200204,Misc,900,Cleaning,12,Jan-Denver(USA)
+
+20200205,Travel,570,Fuel,6,Kings Fuel-Denver(USA)
+20200205,Food,344,Breakfast,1,Bruggers-Denver(USA)
+20200205,Food,360,Coffee,1,Starbucks-Denver(USA)
+20200205,Medical,210,Aloe Plant,3,Plant store-Denver(USA)
+20200205,Food,660,Lunch,1,Taco Cabo-Steamboat Springs(USA)
+20200205,Travel,3060,Snowboard rental,12,maurita's ski service-Steamboat Springs(USA)
+
+20200206,Travel,1510,Lift card,12,Steamboat Ski-Steamboat Springs(USA)
+
+20200207,Travel,4500,Lift card,12,Steamboat Ski-Steamboat Springs(USA)
+20200207,Food,500,Lunch,1,Steamboat Ski-Steamboat Springs(USA)
+20200207,Food,133,Coffee(Ric),1,Steamboat Ski-Steamboat Springs(USA)
+
+20200208,Food,380,Drinks-Coffee,1,Starbucks-Steamboat Springs(USA)
+20200208,Food,350,Breakfast-Bagles,1,Bagle Store-Steamboat Springs(USA)
+20200208,Travel,330,Gas-Car,6,7 Eleven-Silverthorne(USA)
+20200208,Shopping,6703,Clothes,6,Ralph Lauren-Silverthorne(USA)
+20200208,Food,4450,Dinner,1,Sushi Den-Denver(USA)
+20200208,Food,128,Fruit-Honeycrisp apples,1,City Market-Steamboat Springs(USA)
+20200208,Food,255,Berries-Blueberries,1,City Market-Steamboat Springs(USA)
+20200208,Food,136,Water-Sparkling water,City Market-Steamboat Springs(USA)
+20200208,Food,50,Snacks-Candy,3,City Market-Steamboat Springs(USA)
+
+20200210,Food,285,Snacks-Doughnuts,1,Voodoo Doughnut-Denver(USA)
+20200210,Food,745,Lunch-Burritos,1,Illegal Petes-Denver(USA)
+20200210,Misc,508,Gifts,6,King Soopers-Denver(USA)
+20200210,Food,1124,Groceries,1,King Soopers-Denver(USA)
+20200210,Medical,27800,Stash-Live Resin,12,Health Center-Denver(USA)
+20200210,Medical,27000,Stash-Concentrate,12,Health Center-Denver(USA)
+20200210,Medical,18200,Stash-Edibles,12,Health Center-Denver(USA)
+20200210,Medical,3000,Stash-Green,12,Health Center-Denver(USA)
+
+20200211,Living,841,Driver's license renewal,24,DMV Office-Denver(USA)
+20200211,Misc,357,Puzzle,6,Target-Denver(USA)
+20200211,Living,162,Stationary,3,Target-Denver(USA)
+20200211,Travel,880,Gas-Car,6,Kings Fuel-Denver(USA)
+20200211,Food,2090,Dinner,1,Next Door-Denver(USA)
+20200211,Food,773,Drinks-Beer,1,Pepsi Center-Denver(USA)
+20200211,Food,240,Snacks-Nuts,1,Pepsi Center-Denver(USA)
+20200211,Food,405,Drinks-Beer,1,Pepsi Center-Denver(USA)
+20200211,Travel,360,Public Transportation-Light Rail,6,RTD-Denver(USA)
+
+20200213,Medical,3000,Medicine-Anxiety(Jenn),1,Walgreen's-Denver(USA)
+
+20200214,Food,1496,Lunch,1,Yum Yum Spice-Denver(USA)
+20200214,Misc,211,Gifts,1,King Soopers-Denver(USA)
+20200214,Food,2030,Groceries,1,King Soopers-Denver(USA)
+20200214,Food,550,Snacks,1,King Soopers-Denver(USA)
+20200214,Travel,1500,Museum,6,Denver Museum of Nature & Science-Denver(USA)
+
+20200215,Shopping,1950,Makeup(Jenn),6,ULTA Beauty-Denver(USA)
+20200215,Food,180,Snacks-Chocolate Covered Pretzels,Sprouts-Denver(USA)
+20200215,Shopping,425,Presents,6,Tuesday Morning-Denver(USA)
+20200215,Food,715,Snacks,6,King Soopers-Denver(USA)
+
+20200217,Food,1950,Breakfast,1,Aviator's Sports Bar-San Fransisco Airport(USA)
+
+20200219,Medical,150,Gynaecologist-UTI(Jenn),1,ShunSheng Gynaecology-Tamsui(Taiwan)
+20200219,Kitties,2048,Dry food-Earthborn,2,Shopee(yj99999999)-Internet(Taiwan)
+20200219,Kitties,170,Snacks-Tooth cleaner,3,Shopee(yj99999999)-Internet(Taiwan)
+20200219,Kitties,234,Snacks-Fish Mousse,2,Shopee(yj99999999)-Internet(Taiwan)
+
+20200220,Living,3023,TYT Membership,12,The Young Turks(USA)
+20200220,Food,440,Dinner-Pizza,1,Pizza Man-Tamsui
+20200220,Food,178,Lunch,1,Costco
+20200220,Food,418,Drinks-White Wine,2,Costco
+20200220,Food,315,Groceries-Salsa sauce,2,Costco
+20200220,Food,389,Groceries-Spices,2,Costco
+20200220,Food,442,Groceries-Manchego Cheese,3,Costco
+20200220,Food,179,Groceries-Brussel sprouts,1,Costco
+20200220,Food,359,Groceries-Olives,3,Costco
+20200220,Food,155,Groceries-Onions,1,Costco
+20200220,Food,89,Groceries-Carrots,1,Costco
+20200220,Food,549,Groceries-Mozarella Cheese,2,Costco
+20200220,Food,249,Groceries-Goat Cheese,2,Costco
+20200220,Food,159,Groceries-Whole milk,1,Costco
+20200220,Food,385,Groceries-Mixed berries,1,Costco
+20200220,Food,279,Groceries-Prosciutto,2,Costco
+20200220,Food,198,Groceries-Bread,1,Costco
+20200220,Food,79,Groceries-Lettuce,1,Costco
+20200220,Food,75,Groceries-Spinach,1,Costco
+20200220,Kitties,419,Cat litter,1,Costco
+20200220,Shopping,825,Parasol,6,Costco
+20200220,Food,209,Groceries-Bell peppers,1,Costco
+20200220,Food,149,Groceries-Cherry tomatoes,1,Costco
+
+20200221,Food,165,Breakfast,1,MyWarmDay-Tamsui
+20200221,Food,165,Coffee-Mocha(Ric),1,Starbucks-Tamsui
+20200221,Food,1339,Dinner,1,Red Barn-Tamsui
+20200221,Transportation,572,Gogoro Maintenance Service,6,Gogoro
+
+20200222,Medical,150,Gynaecologist-UTI(Jenn),1,ShunSheng Gynaecology-Tamsui(Taiwan)
+20200222,Food,55,Fruit tea,1,Tea Top-Taipei City(Taiwan)
+20200222,Transportation,220,MRT-Tamsui Station <-> Gongguan Station,1,Taipei MRT
+20200222,Entertainment,460,Movie tickets,1,Broadway 3D Digital Cinema
+20200222,Food,1500,Dinner-BBQ,1,ZhanJiang BBQ
+20200222,Transportation,20,Parking,1,Tamsui MRT Station
+
+20200224,Medical,452,Psychiatrist,1,Shinyue
+
+20200225,Food,90,Breakfast,1,Breakfast Store
+20200225,Transportation,610,Gogoro Bill,1,Gogoro
+20200225,Food,500,CO2 refill,2,DaHua Gas
+
+20200226,Food,45,Breakfast(Jenn),1,Breakfast Store
+20200226,Food,45,Coffee(Jenn),1,Breakfast Store
+20200226,Debt,12074,Student loan(Ric),3,CSN-(Sweden)
+20200226,Medical,7265,National Health Insurance(Ric),2 Department of Health
+20200226,Food,690,Dinner-Suhi,1,HanRi Sushi
+20200226,Transportation,220,MRT-Tamsui to Guting,1,MRT
+20200226,Medical,200,UTI(Jenn),1,Man-Yi Gynecology Clinic
+
+20200227,Food,55,Breakfast(Jenn),1,Breakfast Store
+20200227,Food,440,Dinner-Pizza,1,Pizza Man
+
+20200229,Transportation,120,MRT-Tamsui to Qizhang,1,MRT
+20200229,Food,45,Bread-Garlic bread(Jenn),1,Sun Merry Bakery
+20200229,Transportation,120,MRT-Qizhang to Tamsui,1,MRT
+20200229,Food,165,Coffee-Mocha(Ric),1,Starbucks-Xindian(Taiwan)
+20200229,Food,630,Dinner,Santorini Souvlaki-Xindian(Taiwan)
+20200229,Food,113,Ice Cream,1,7-Eleven-Xindian(Taiwan)
+20200229,Transportation,115,Taxi-Kyle's house to Xindian MRT Station,1,Xindian Taxi
+
+20200302,Food,55,Breakfast(Jenn),1,Breakfast Store
