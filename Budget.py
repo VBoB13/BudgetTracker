@@ -320,17 +320,21 @@ class Budget:
         OUTPUT:
         - foodDF (type: Pandas DataFrame) with an extra column of categorical variable "Meal"
         '''
+        if "-" in comment_text:
+            comment = comment_text.split("-")
+        else:
+            comment = comment_text
         
-        mealTypes = ['Breakfast', 'Lunch', 'Dinner']
+        mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks']
 
         for meal in mealTypes:
-            if meal in comment_text:
+            if meal in comment:
                 return meal
         
         return None
 
     def isMeal(self, meal):
-        if meal in ['Breakfast', 'Lunch', 'Dinner']:
+        if meal in ['Breakfast', 'Lunch', 'Dinner', 'Snacks']:
             return True
         else:
             return False
@@ -343,11 +347,46 @@ class Budget:
 
         return foodDF[meal]
 
+    def getStore(self, transource):
+        if '-' in transource:
+            try:
+                store = transource.split('-')[0]
+            except Exception as err:
+                print(err)
+                print("\n\n ------- \t ------- \t -------\
+                        \n\t'transource.split('-')' failed to execute) \
+                        \n\n Reason: Check source error for hints, lazy :) \
+                        \n\n ------- \t ------- \t -------")
+            else:
+                return store
+        else:
+            return transource
+
+    def getLocation(self, transource):
+        if '-' in transource:
+            try:
+                location = transource.split('-')[1]
+            except Exception as err:
+                print(err)
+                print("\n\n ------- \t ------- \t -------\
+                        \n\t'transource.split('-')' failed to execute) \
+                        \n\n Reason: Check source error for hints, lazy :) \
+                        \n\n ------- \t ------- \t -------")
+            else:
+                return location
+        else:
+            return "None"
+
+
     def analyzeFood(self):
         foodDF = self.getFoodData()
+        foodDF['transource'] = foodDF['transource'].astype(str)
+        foodDF['Store'] = foodDF['transource'].apply(self.getStore)
+        foodDF['Location'] = foodDF['transource'].apply(self.getLocation)
         print(foodDF)
 
-        sns.barplot(x='Meal', y='amount', data=foodDF, hue='transource', palette='bright')
+        sns.barplot(x='Meal', y='amount', data=foodDF, hue='Store', palette='bright')
+        sns.barplot(x='Store', y='amount', data=foodDF, palette='viridis')
         plt.show()
 
     def analyzePandasDataFrame(self):
