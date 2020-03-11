@@ -362,6 +362,12 @@ class Budget:
         else:
             return transource
 
+    def isStore(self, store):
+        if store == 'None':
+            return False
+        else:
+            return True
+
     def getLocation(self, transource):
         if '-' in transource:
             try:
@@ -381,7 +387,13 @@ class Budget:
     def analyzeFood(self):
         foodDF = self.getFoodData()
         foodDF['transource'] = foodDF['transource'].astype(str)
+        
+        # Managing and filtering out unnecessary data in terms of stores
         foodDF['Store'] = foodDF['transource'].apply(self.getStore)
+        isStore = foodDF['Store'].apply(self.isStore)
+        foodDF = foodDF[isStore]
+        foodDF['Store'] = foodDF['Store'].apply(lambda store: store.capitalize())
+
         foodDF['Location'] = foodDF['transource'].apply(self.getLocation)
         print(foodDF)
 
