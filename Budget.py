@@ -43,6 +43,7 @@ class Budget:
     categorizedSpendingThisMonth = {}
     sqlSpendingData = pd.DataFrame
     sqlBudgetData = pd.DataFrame
+    localCountry = 'Taiwan'
 
     def __init__(self):
         self.getLastMonthToday()
@@ -381,29 +382,48 @@ class Budget:
             else:
                 return location
         else:
-            return "None"
+            return "(Taiwan)"
 
+    def isLocal(self, location):
+        # Filtering out all data that is not local
+        if self.localCountry in location:
+            return True
+        else:
+            return False
 
     def analyzeFood(self):
         foodDF = self.getFoodData()
         foodDF['transource'] = foodDF['transource'].astype(str)
         
+        # Managing and filtering out unnecessary data in terms of location
+        foodDF['Location'] = foodDF['transource'].apply(self.getLocation)
+        isLocal = foodDF['Location'].apply(self.isLocal)
+        foodDF = foodDF[isLocal]
+
         # Managing and filtering out unnecessary data in terms of stores
         foodDF['Store'] = foodDF['transource'].apply(self.getStore)
         isStore = foodDF['Store'].apply(self.isStore)
         foodDF = foodDF[isStore]
         foodDF['Store'] = foodDF['Store'].apply(lambda store: store.capitalize())
 
-        foodDF['Location'] = foodDF['transource'].apply(self.getLocation)
         print(foodDF)
 
-        sns.barplot(x='Meal', y='amount', data=foodDF, hue='Store', palette='bright')
-        sns.barplot(x='Store', y='amount', data=foodDF, palette='viridis')
+        fig = plt.figure()
+        axes1 = fig.add_axes([0.1, 0.6, 0.80, 0.35])
+        axes2 = fig.add_axes([0.1, 0.1, 0.80, 0.35])
+
+        sns.barplot(x='Meal', y='amount', data=foodDF, palette='bright', ax=axes1)
+        plt.ylabel('Avg. Amount (NTD)')
+        sns.barplot(x='Meal', y='amount', data=foodDF, hue='Store', palette='bright', ax=axes2)
+        plt.legend(loc=[1.01,0])
+        plt.tight_layout()
         plt.show()
 
     def analyzePandasDataFrame(self):
         dailyCategoryMeansDF = self.getTimeFrameMeans()
         dailyCategoryMeansDF = dailyCategoryMeansDF[:].apply(pd.to_numeric)
+        dailyCategoryMeansDF.rename(columns={'Living':'Rent & Utilities'}, 
+                                                inplace=True)
         sns.set_style(style='darkgrid')
         sns.lineplot(data=dailyCategoryMeansDF, palette='bright', dashes=False, lw=1.2)
 
@@ -412,10 +432,8 @@ class Budget:
         plt.xlabel('Date')
         plt.ylabel('Amount (NTD)')
 
-        if int(
-            dailyCategoryMeansDF['Avg. Daily Spending'].max()) > int(
-            float(
-                self.avgDailyIncome)):
+        if int(dailyCategoryMeansDF['Avg. Daily Spending'].max()) > int(
+                                                                    float(self.avgDailyIncome)):
             ymax = int(dailyCategoryMeansDF['Avg. Daily Spending'].max())
         else:
             ymax = int(float(self.avgDailyIncome))
