@@ -92,7 +92,7 @@ class Budget:
         try:
             incomeDF = pd.read_sql_query(query, conn)
         except Exception as err:
-            print("\n\t-- Was not able to add data to database --")
+            print("\n\t-- Was not able to extract data from database to DataFrame (income) --")
             print(f"\t Error: {err}\n")
         else:
 

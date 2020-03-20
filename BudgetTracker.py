@@ -1,11 +1,19 @@
+from FileLoader import FileLoader
 import datetime
 from calendar import monthrange
 import csv
+import psycopg2 as pg2
+from psycopg2.extras import execute_values as pg2_execute_values
+import pandas as pd
+import numpy as np
 
 from Expense import Expense
 from RecurringCost import RecurringCost
 from Income import Income
 from Budget import Budget
+
+pwfile = FileLoader("pass.txt")
+secret = pwfile.loadPass()
 
 
 def inputExpense(expenseInfo):
@@ -212,6 +220,106 @@ def fileLoader(month):
         print("\n\tData retrieval successful!")
 
 
+def updateTransourceTable_getData():
+    conn = pg2.connect(database='BudgetTracker', user='postgres',
+                        password=secret, host='localhost', port='5432')
+    query = '''
+                SELECT * FROM transource
+                ORDER BY id;
+                '''
+    
+    try:
+        transourceDF = pd.read_sql_query(query, conn)
+    except Exception as err:
+        print("\n\n *** Wasn't able to fetch data from TABLE 'transource' ***\n\n")
+        print(err)
+    else:
+        return transourceDF
+
+def updateTransourceTable(transourceDF):
+    print("\n\n --- UPDATING transource TABLE --- \n\n")
+
+    firstID = transourceDF['id'].iloc[0]
+    lastID = transourceDF['id'].iloc[-1]
+    maxID = transourceDF['id'].size
+
+    print("First ID:\t{}\nLast ID:\t{}\nDF Max Index:\t{}".format(firstID, lastID, maxID))
+    
+    transourceDF['area'] = transourceDF['name'].apply(updateTransourceTable_transourceArea)
+    transourceDF['country'] = transourceDF['name'].apply(updateTransourceTable_transourceCountry)
+    transourceDF['name'] = transourceDF['name'].apply(updateTransourceTable_transourceName)
+
+    print(transourceDF)
+
+    print("\n\n\t********************\
+                \n\tStarting Updates\
+                \n\t********************\n")
+    transourceDF_tuple = tuple(zip(transourceDF.name, transourceDF.area, transourceDF.country, transourceDF.id))
+    print(transourceDF_tuple)
+    updateTransourceTable_SQL(transourceDF_tuple)
+
+def updateTransourceTable_SQL(transourceDF_tuple):
+    conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    try:
+        update_query = """UPDATE transource AS t 
+                            SET name = e.name,
+                            area = e.area,
+                            country = e.country
+                            FROM (VALUES %s) AS e(name, area, country, id) 
+                            WHERE e.id = t.id;"""
+
+        pg2_execute_values(cur, update_query, transourceDF_tuple, template=None, page_size=100)
+
+    except Exception as err:
+        print("\n\t*** *** *** *** *** \
+                \n\tSQL UPDATE ERROR\
+                \n\t*** *** *** *** ***\n\n")
+        print(err)
+    finally:
+        conn.close()
+
+def updateTransourceTable_transourceName(transourceText):
+    if '-' in transourceText:
+        return transourceText.split('-')[0]
+    else:
+        return transourceText
+
+def updateTransourceTable_transourceArea(transourceText):
+    if '-' in transourceText:
+        
+        transourceLocation = transourceText.split('-')[1]
+        if '(' in transourceLocation:
+            transourceArea = transourceLocation.split('(')[0]
+            return transourceArea
+        else:
+            return ''
+
+    else:
+        return ''
+
+def updateTransourceTable_transourceCountry(transourceText):
+    if '-' in transourceText:
+        
+        transourceLocation = transourceText.split('-')[1]
+        if '(' in transourceLocation:
+            transourceCountry = transourceLocation.split('(')[1].replace(')','')
+            return transourceCountry
+        else:
+            return ''
+
+    else:
+        return ''
+
+
+def menu_updateTransource():
+    data = updateTransourceTable_getData()
+    updateTransourceTable(data)
+
+
+
 master_input = True
 menu_choice = 0
 
@@ -219,7 +327,7 @@ menu_choice = 0
 while master_input:
     try:
         menu_choice = int(input(
-            "\nWhat would you like to do? \n(input corresponding number) \n\n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n"))
+            "\nWhat would you like to do? \n(input corresponding number) \n\n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n\t5: Update Data"))
     except Exception as err:
         print("Sorry, we were not able to determine what you would like to do.")
         print(err)
@@ -314,14 +422,25 @@ while master_input:
                 fileLoader(month=input(
                     "\nType the month that you want to import into the database.\n\tNote that the file has to be in the same folder as the application itself and must be CSV format.\n\tMonth: "))
 
-                if input(
-                        "\nWould you like to load data from other files?\n\t'y'/'n' : ").lower() == 'y':
+                if input("\nWould you like to load data from other files?\n\t'y'/'n' : ").lower() == 'y':
                     dataLoad = True
                 else:
                     dataLoad = False
 
+        elif menu_choice == 5:
+            print("\nYou chose 5: Update Data\n")
+
+            updateData = True
+            while updateData:
+                menu_updateTransource()
+
+                if input("\nWould you like to update data AGAIN?!\n\t'y'/'n' : ").lower() == 'y':
+                    updateData = True
+                else:
+                    updateData = False
+
         else:
-            print("\nPlease, make a valid menu choice (1-3).")
+            print("\nPlease, make a valid menu choice (1-5).")
             continue
 
     master_input = (
