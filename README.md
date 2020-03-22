@@ -11,4 +11,36 @@ So from now on, I've decided to almost re-write the entire application with the 
 <li>	Re-organize the <b><i>database</i></b> for much needed clarity in data.	</li>
 </ol>
 
-I will write more about the 'renovation' in a bit.
+<h1>Menu</h1>
+<ol>
+  <li>Add Data
+    <ul>
+      <li>Add Expenses</li>
+      <li>Add Transaction Source</li>
+      <li>Add Income</li>
+      <li>Add Bank Account</li>
+      <li>Add Loans</li>
+      <li>Return to Main Menu</li>
+    </ul>
+  </li>
+  <li>Edit Data
+    <ul>
+      <li>Edit Expenses</li>
+      <li>Edit Transaction Source</li>
+      <li>Edit Income</li>
+      <li>Edit Bank Account</li>
+      <li>Edit Loans</li>
+      <li>Return to Main Menu</li>
+    </ul>
+  </li>
+  <li>Analyze Data
+    <ul>
+      <li>Overall Summary</li>
+      <li>Categorical Spending Analysis</li>
+      <li>Budget Analysis</li>
+      <li>Future Projectory Analysis</li>
+      <li>Return to Main Menu</li>
+    </ul>
+  </li>
+  <li>Quit</li>
+</ol>
