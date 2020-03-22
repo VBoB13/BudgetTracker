@@ -1,5 +1,5 @@
 # BudgetTracker
-Hey fellas!
+Hey fellas!</p>
 Since late last year, I've been working on this project as somehting I could do to practice my Python & data analysis skills while it benefits myself.
 However, I have realized in recent days that this project needs (to say the least) some real make-over. It needs to be renovated.
 
