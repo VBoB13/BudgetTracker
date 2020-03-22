@@ -77,4 +77,14 @@ This seciton is heavily relying on the following libraries:
   <li>seaborn</li>
   <li>psycopg2</li>
 </ul>
+
 #### Overall Summary
+This is going to provide the user with general spending analysis and plotting it out on different graphs. This is the general idea:
+<ul>
+  <li>Full timeline with overall spending, income and total assets.</li>
+  <li>Graph that shows money saved each day.</li>
+  <li>A table that shows these numbers.</li>
+</ul>
+
+more coming soon...
+  
