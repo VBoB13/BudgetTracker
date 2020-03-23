@@ -79,12 +79,37 @@ This seciton is heavily relying on the following libraries:
 </ul>
 
 #### Overall Summary
-This is going to provide the user with general spending analysis and plotting it out on different graphs. This is the general idea:
+This is going to provide the user with general spending analysis and plotting it out on different graphs. This function will most likely end up using most of the database in its calculations. This is the general idea is that it should provide:
 <ul>
   <li>Full timeline with overall spending, income and total assets.</li>
-  <li>Graph that shows money saved each day.</li>
+  <li>Graph that shows money saved each day until today.</li>
   <li>A table that shows these numbers.</li>
 </ul>
 
-more coming soon...
+#### Categorical Analysis
+This will be a function that takes the data from the <b><i>year_record</b></i> table where all the individual transactions are stored and perform the following calculations:
+<ul>
+  <li>Show a graph that shows <i><u>how much of the total budget that each category takes up.</i></u></li>
+  <li>Show how much each individual sub-category in <i><u>groceries</i></u> take up compared to total groceries.</li>
+  <li>Will add more to this function as I figure out more things</li>
+</ul>
+  
+#### Budget Analysis
+This function will have a sole purpose of comparing the user's set numbers against what the current actual numbers state.
+The things that will be calculated or shown will be:
+<ul>
+  <li>Show how each number compare against the user's pre-set budget numbers.</li>
+  <li>Future implementations:
+  <ul>
+    <li>Show user if their saving goals are met with current budget projectory</li>
+    <li>Download local consumption data from government statistical websites through API and compare the user's budget against those</li>
+  </ul>
+  </li>
+</ul>
+
+#### Future Projectory
+This function will be kind of similar to the Budget Analysis but with more emphasis on future prediction graphs.
+As I learn more about Machine Learning, I will most likely implement a bunch of that into the future projectory function, but we shall see as time passes :)
+
+Now when the structure is a little clearer, I will start off with the most obvious task - to make sure the current (messy) main database table <b><u>year_record</b></u> has its transource_id field correctly filled so that each transaction can be related to a source.
   
