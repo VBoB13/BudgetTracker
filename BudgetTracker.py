@@ -220,103 +220,10 @@ def fileLoader(month):
         print("\n\tData retrieval successful!")
 
 
-def updateTransourceTable_getData():
-    conn = pg2.connect(database='BudgetTracker', user='postgres',
-                        password=secret, host='localhost', port='5432')
-    query = '''
-                SELECT * FROM transource
-                ORDER BY id;
-                '''
-    
-    try:
-        transourceDF = pd.read_sql_query(query, conn)
-    except Exception as err:
-        print("\n\n *** Wasn't able to fetch data from TABLE 'transource' ***\n\n")
-        print(err)
-    else:
-        return transourceDF
-
-def updateTransourceTable(transourceDF):
-    print("\n\n --- UPDATING transource TABLE --- \n\n")
-
-    firstID = transourceDF['id'].iloc[0]
-    lastID = transourceDF['id'].iloc[-1]
-    maxID = transourceDF['id'].size
-
-    print("First ID:\t{}\nLast ID:\t{}\nDF Max Index:\t{}".format(firstID, lastID, maxID))
-    
-    transourceDF['area'] = transourceDF['name'].apply(updateTransourceTable_transourceArea)
-    transourceDF['country'] = transourceDF['name'].apply(updateTransourceTable_transourceCountry)
-    transourceDF['name'] = transourceDF['name'].apply(updateTransourceTable_transourceName)
-
-    print(transourceDF)
-
-    print("\n\n\t********************\
-                \n\tStarting Updates\
-                \n\t********************\n")
-    transourceDF_tuple = tuple(zip(transourceDF.name, transourceDF.area, transourceDF.country, transourceDF.id))
-    print(transourceDF_tuple)
-    updateTransourceTable_SQL(transourceDF_tuple)
-
-def updateTransourceTable_SQL(transourceDF_tuple):
-    conn = pg2.connect(database='BudgetTracker', user='postgres', password=secret, host='localhost', port='5432')
-    conn.autocommit = True
-    cur = conn.cursor()
-
-    try:
-        update_query = """UPDATE transource AS t 
-                            SET name = e.name,
-                            area = e.area,
-                            country = e.country
-                            FROM (VALUES %s) AS e(name, area, country, id) 
-                            WHERE e.id = t.id;"""
-
-        pg2_execute_values(cur, update_query, transourceDF_tuple, template=None, page_size=100)
-
-    except Exception as err:
-        print("\n\t*** *** *** *** *** \
-                \n\tSQL UPDATE ERROR\
-                \n\t*** *** *** *** ***\n\n")
-        print(err)
-    finally:
-        conn.close()
-
-def updateTransourceTable_transourceName(transourceText):
-    if '-' in transourceText:
-        return transourceText.split('-')[0]
-    else:
-        return transourceText
-
-def updateTransourceTable_transourceArea(transourceText):
-    if '-' in transourceText:
-        
-        transourceLocation = transourceText.split('-')[1]
-        if '(' in transourceLocation:
-            transourceArea = transourceLocation.split('(')[0]
-            return transourceArea
-        else:
-            return ''
-
-    else:
-        return ''
-
-def updateTransourceTable_transourceCountry(transourceText):
-    if '-' in transourceText:
-        
-        transourceLocation = transourceText.split('-')[1]
-        if '(' in transourceLocation:
-            transourceCountry = transourceLocation.split('(')[1].replace(')','')
-            return transourceCountry
-        else:
-            return ''
-
-    else:
-        return ''
-
-
 def menu_updateTransource():
-    data = updateTransourceTable_getData()
-    updateTransourceTable(data)
+    print("\n\n ****************************************\
+            \nThis function is not doing anything anymore...\
+            \n***************************************\n\n")
 
 
 
