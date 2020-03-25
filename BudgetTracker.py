@@ -234,7 +234,26 @@ menu_choice = 0
 while master_input:
     try:
         menu_choice = int(input(
-            "\nWhat would you like to do? \n(input corresponding number) \n\n\t1: Expenses \n\t2: Income \n\t3: Analyze Budget\n\t4: Load Data\n\t5: Update Data"))
+            "\nWhat would you like to do? \n(input corresponding number) \
+                \n\tAdd Data \
+                    \n\t\t 11. Expenses \
+                    \n\t\t 12. Income \
+                    \n\t\t 13. Transaction Source \
+                    \n\t\t 14. Bank Account \
+                    \n\t\t 15. Loan \
+                \n\tEdit Data \
+                    \n\t\t 21. Expenses \
+                    \n\t\t 22. Income \
+                    \n\t\t 23. Transaction Source \
+                    \n\t\t 24. Bank Account \
+                    \n\t\t 25. Loan \
+                \n\tAnalyze Budget \
+                    \n\t\t 31. Overall Analysis \
+                    \n\t\t 32. Categorical Spending Analysis \
+                    \n\t\t 33. Budget Analysis \
+                    \n\t\t 34. Future Projectory Analysis \
+                \n\tLoad Data \
+                \n\tUpdate Data"))
     except Exception as err:
         print("Sorry, we were not able to determine what you would like to do.")
         print(err)
@@ -242,8 +261,8 @@ while master_input:
 
         # MENU choice 1 - Expenses
 
-        if menu_choice == 1:
-            print("\nYou chose 1: Expenses\n")
+        if menu_choice == 11:
+            print("\nYou chose 11: Add Expenses\n")
 
             while True:
                 try:
@@ -253,28 +272,11 @@ while master_input:
                     print("\nTry using a number.. works better that way. Dumbass.\n")
                     print(err)
                 else:
-
-                    if 1 <= expenseInput <= 3:
-                        while expenseInput == 1:
-
-                            expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment(, investment period)\n\tAs in: 20191007,Food,500,Dinner\n\t-- OR --\n\tAs in: 20191007,Food,500,Dinner,12 (for 12 months investment period)\n\tIf there's no input for Investment Period, the value will automatically be set to 1.\n\n\t Enter your expense data: ")
-                            expense = inputExpense(expenseInfo)
-                            if expense is not None:
-                                print(expense)
-                                # SAVE THE ENTERED DATA INTO A DATABASE
-                                expense.addExpense()
-
-                            if input(
-                                    "Would you like to input more expenses?\n\t'y'/'n' : ").lower() == 'y':
-                                continue
-                            else:
-                                expenseInput = 0
-                                break
-                    elif expenseInput == 4:
-                        break
-                    else:
-                        break
-
+                    expenseInfo = input("Please enter the necessary information about the expense in the following format:\n\t date,category,amount,comment(, investment period)\n\tAs in: 20191007,Food,500,Dinner\n\t-- OR --\n\tAs in: 20191007,Food,500,Dinner,12 (for 12 months investment period)\n\tIf there's no input for Investment Period, the value will automatically be set to 1.\n\n\t Enter your expense data: ")
+                    expense = inputExpense(expenseInfo)
+                    print(expense)
+                    # SAVE THE ENTERED DATA INTO A DATABASE
+                    expense.addExpense()
 
         # MENU choice 2 - Income
 
@@ -333,6 +335,8 @@ while master_input:
                     dataLoad = True
                 else:
                     dataLoad = False
+
+        # MENU choice 5 - Update Data
 
         elif menu_choice == 5:
             print("\nYou chose 5: Update Data\n")
