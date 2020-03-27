@@ -24,12 +24,12 @@ category_check_list = {
 
 class Expense:
 
-    def __init__(self, time, category, amount, comment='', transource='', investment_period=1):
+    def __init__(self, time: datetime.datetime=None, category: str='', amount: int=None, comment: str='', transource_id: int=None, investment_period=1):
         self.time = time
         self.category = category
         self.amount = amount
         self.comment = comment
-        self.transource = transource
+        self.transource = transource_id
         self.investment_period = investment_period
 
     def __str__(self):
@@ -46,6 +46,7 @@ class Expense:
 
     def editComment(self, comment):
         self.comment = comment
+
 
     def addExpense(self):
 
