@@ -71,7 +71,7 @@ def expenseCategoryInput():
     PARAMETERS: None
     OUTPUT: categoryID (int)
     '''
-    categoryListDF = getCategoryList()
+    categoryListDF = getDataList('categories')
 
     while True:
 
@@ -93,30 +93,6 @@ def expenseCategoryInput():
         else:
             return categoryID
 
-
-def getCategoryList():
-    '''
-    A function that simply fetches the data from the 'categories' table.
-    INPUT: None
-    OUTPUT: categoryListDF (pandas.DataFrame)
-    '''
-
-    conn = pg2.connect(database='BudgetTracker', user='postgres',
-                           password=secret, host='localhost', port='5432')
-    sqlQuery = '''
-                SELECT id, 
-                maincategory_name AS main,
-                subcategory_name AS sub
-                FROM categories
-                ORDER BY id
-                '''
-    try:
-        categoryListDF = pd.read_sql_query(sqlQuery, conn)
-    except Exception as err:
-        print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
-        print(err)
-    else:
-        return categoryListDF
 
 
 # ___________________________________________________________
@@ -156,7 +132,89 @@ def expenseCommentInput():
 #  <<<<<<<      Expense Transource ID Input Start        >>>>>>>
 #__________________________________________________________________
 
-def 
+def expenseTransource_idInput():
+    tryAgain = ''
+    
+    while True:
+        
+        transourceDF = getDataList('transource')
+
+        if transourceDF != None:
+            print(transourceDF.head(10))
+            try:
+                userChoice = int(input("\nIf you see your wanted transource among the entries, please enter its ID: "))
+            except Exception(TypeError) as err:
+                print("\nTry to put in a number... a-hole.")
+                print(err)
+            else:
+                return userChoice
+            
+        else:
+            print("\nSeems like you weren't able to get a proper transource-table out.")
+            tryAgain = str(input("\nWould you like to try again? \
+                                    \n\t y/n: ")).lower()
+        
+        if tryAgain == 'y':
+            continue
+        else:
+            return None
+
+
+
+
+# _________________________________________________________________
+#  <<<<<<<      Expense Input :: Get LISTS Start        >>>>>>>
+#__________________________________________________________________
+
+def getDataList(type: str=''):
+    '''
+    A function that simply fetches the data from the table provided in the argument 'type'.
+    INPUT: type (str)
+    OUTPUT: categoryListDF (pandas.DataFrame)
+    '''
+
+    conn = pg2.connect(database='BudgetTracker', user='postgres',
+                           password=secret, host='localhost', port='5432')
+
+    if type == 'categories':
+        sqlQuery = '''
+                    SELECT id, 
+                    maincategory_name AS main,
+                    subcategory_name AS sub
+                    FROM categories
+                    ORDER BY id
+                    '''
+
+        try:
+            categoryListDF = pd.read_sql_query(sqlQuery, conn)
+        except Exception as err:
+            print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
+            print(err)
+        else:
+            return categoryListDF
+
+    elif type == 'transource':
+
+        searchQuery = str(input("\nPlease enter a few characters to search for (3~6 characters) \
+                                    \n\tSearch for: "))
+        
+        if len(searchQuery) > 3:
+            whereClause = "WHERE name LIKE '\%{}\%'".format(searchQuery)
+            sqlQuery = '''
+                SELECT * FROM transource
+                {}
+                ORDER BY name
+                '''.format(whereClause)
+            
+            try:
+                transourceListDF = pd.read_sql_query(sqlQuery, conn)
+            except Exception as err:
+                print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
+                print(err)
+            else:
+                return transourceListDF
+    else:
+        return None
 
 
 
