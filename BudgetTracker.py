@@ -17,18 +17,21 @@ secret = pwfile.loadPass()
 
 def inputExpenseData():
     expenseDate = expenseDateInput()
-    expenseCategory = expenseCategoryInput()
+    expenseCategoryID = expenseCategoryInput()
     expenseAmount = expenseAmountInput()
     expenseComment = expenseCommentInput()
-    expenseTransource_id = expenseTransource_idInput()
+    expenseTransource_ID = expenseTransource_IDInput()
     expenseInvestmentPeriod = expenseInvestmentPeriodInput()
 
-    return Expense(expenseDate, 
-                    expenseCategory,
+    if None not in (expenseDate, expenseCategoryID, expenseAmount, expenseComment, expenseTransource_ID, expenseInvestmentPeriod):
+        return Expense(expenseDate, 
+                    expenseCategoryID,
                     expenseAmount,
                     expenseComment,
-                    expenseTransource_id,
+                    expenseTransource_ID,
                     expenseInvestmentPeriod)
+    else:
+        return None
 
 # _______________________________________________________
 #  <<<<<<<      Expense Date Input Start        >>>>>>>
@@ -36,11 +39,13 @@ def inputExpenseData():
 
 def expenseDateInput():
     while True:
-        dateInput = str(input("\n\n\tPlease enter a date for your expense: \nFORMAT: yyyy-mm-dd"))
-        if dateInput.split("-").len() == 3 and \
-            dateInput.split("-")[0].len() == 4 and \
-            dateInput.split("-")[1].len() == 2 and \
-            dateInput.split("-")[2].len() == 2:
+        dateInput = str(input("\n\n\tPlease enter a date for your expense: \nFORMAT: yyyy-mm-dd\
+                                \n\tInput: "))
+        if len(dateInput.split("-")) == 3 and \
+            len(dateInput.split("-")[0]) == 4 and \
+            len(dateInput.split("-")[1]) == 2 and \
+            len(dateInput.split("-")[2]) == 2:
+
             try:
                 expenseDate = datetime.date(dateInput)
             except Exception as err:
@@ -51,6 +56,7 @@ def expenseDateInput():
                 correctInput = str(input("\nIs this correct? \ny/n: ")).lower()
                 if correctInput == 'y':
                     return expenseDate
+
         else:
             print("\n****** WARNING ******* \
                     \nInvalid input format \
@@ -78,7 +84,7 @@ def expenseCategoryInput():
         print(categoryListDF)
         categoryInput = int(input("\n\n\tPlease enter the category for the expense. \
                                             \nFORMAT: Number in the 'id' column \
-                                            \nEnter category id: "))
+                                            \n\tEnter category id: "))
         try:
             categoryID = int(categoryListDF['id'][categoryListDF['id'] == categoryInput].iloc[0])
         except Exception as err:
@@ -110,6 +116,8 @@ def expenseAmountInput():
                                     \ny/n: "))
             if userChoice == 'n':
                 return None
+            else:
+                continue
         else:
             return amount
     
@@ -132,7 +140,7 @@ def expenseCommentInput():
 #  <<<<<<<      Expense Transource ID Input Start        >>>>>>>
 #__________________________________________________________________
 
-def expenseTransource_idInput():
+def expenseTransource_IDInput():
     tryAgain = ''
     
     while True:
@@ -160,6 +168,31 @@ def expenseTransource_idInput():
             return None
 
 
+# _____________________________________________________________________
+#  <<<<<<<      Expense Input :: Input Investment Period        >>>>>>>
+#______________________________________________________________________
+
+def expenseInvestmentPeriodInput():
+    investmentPeriod = 1
+    userInput = str(input("\nWould you like to enter an investment period?\
+                            \n\ty/n: "))
+    
+    if userInput == 'y':
+        try:
+            investmentPeriod = int(input("\nInv. Period: "))
+        except Exception(TypeError) as err:
+            print("\nIf you're going to be such an a-hole, then:\
+                    \n\tInv. Period set to: 1")
+            print(err)
+            investmentPeriod = 1
+        except Exception as err:
+            print("\nUnexpected ERROR occurred while int(input(inv_period))")
+            print(err)
+            investmentPeriod = 1
+        finally:
+            return investmentPeriod
+    else:
+        return investmentPeriod
 
 
 # _________________________________________________________________
@@ -185,36 +218,36 @@ def getDataList(type: str=''):
                     ORDER BY id
                     '''
 
-        try:
-            categoryListDF = pd.read_sql_query(sqlQuery, conn)
-        except Exception as err:
-            print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
-            print(err)
-        else:
-            return categoryListDF
-
     elif type == 'transource':
 
-        searchQuery = str(input("\nPlease enter a few characters to search for (3~6 characters) \
+        sqlQuery = str(input("\nPlease enter a few characters to search for (3~6 characters) \
                                     \n\tSearch for: "))
         
-        if len(searchQuery) > 3:
-            whereClause = "WHERE name LIKE '\%{}\%'".format(searchQuery)
-            sqlQuery = '''
-                SELECT * FROM transource
-                {}
-                ORDER BY name
-                '''.format(whereClause)
+        if len(sqlQuery) > 3:
+            whereClause = '''
+                            WHERE name LIKE '%{}%'
+                            '''.format(sqlQuery)
+        
+        sqlQuery = '''
+            SELECT * FROM transource
+            {}
+            ORDER BY name
+            '''.format(whereClause)
             
-            try:
-                transourceListDF = pd.read_sql_query(sqlQuery, conn)
-            except Exception as err:
-                print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
-                print(err)
-            else:
-                return transourceListDF
     else:
         return None
+
+    
+    try:
+        listDF = pd.read_sql_query(sqlQuery, conn)
+    except Exception as err:
+        print("\nFAILED to execute the following SQL query: \n{}".format(sqlQuery))
+        print(err)
+    else:
+        return listDF
+    finally:
+        conn.close()
+
 
 
 
@@ -340,6 +373,12 @@ def menu_updateTransource():
             \n***************************************\n\n")
 
 
+# ********************************************************************************************************************************************
+# ******************************************************                     ******************************************************************
+# **************************************************          Main Menu         **************************************************************
+# ******************************************************                    ******************************************************************
+# ********************************************************************************************************************************************
+
 
 master_input = True
 menu_choice = 0
@@ -380,7 +419,11 @@ while master_input:
             expense = inputExpenseData()
             print(expense)
             # SAVE THE ENTERED DATA INTO A DATABASE
-            expense.addExpense()
+            if expense != None:
+                expense.addExpense()
+            else:
+                print("\nOne or more of the values needed for an Expense object were not provided.\
+                        \n\tNo action taken.")
 
         # MENU choice 2 - Income
 

@@ -24,13 +24,16 @@ category_check_list = {
 
 class Expense:
 
-    def __init__(self, time: datetime.datetime=None, category: str='', amount: int=None, comment: str='', transource_id: int=None, investment_period=1):
-        self.time = time
-        self.category = category
-        self.amount = amount
-        self.comment = comment
-        self.transource = transource_id
-        self.investment_period = investment_period
+    def __init__(self, time: datetime.datetime=None, categoryID: int=None, amount: int=None, comment: str='', transource_id: int=None, investment_period=1):
+        if time or categoryID or amount or transource_id is None:
+            print("\nData missing for a (few) Expense attributes.")
+        else:
+            self.time = time
+            self.category = categoryID
+            self.amount = amount
+            self.comment = comment
+            self.transource = transource_id
+            self.investment_period = investment_period
 
     def __str__(self):
         return f"\n -- Details --\n\t${self.amount} NT \n\tCategory: {self.category} \n\tTime: {self.time} \n\tComment: {self.comment}\n\t Transaction source: {self.transource}\n\tInvestment period: {self.investment_period} months\n"
